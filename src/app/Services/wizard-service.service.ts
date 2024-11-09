@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IContainer } from '../models/wizard-interfaces';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -17,8 +17,9 @@ export class WizardService {
   private readonly mastertagID = "1"
   private readonly converionTagID = "1"
   private readonly awLastId = "1"
-  private readonly AllPagesTrigger = "1"
   private savedVariables: { [key: string]: string } = {};
+  private AllPagesTrigger: any = {};
+  private FolderID: any = {};
 
   constructor(private http: HttpClient) {}
 
@@ -29,7 +30,6 @@ export class WizardService {
 
     //Var Definitions
     let prefix: string = '';
-    let folderID: any = '';
     let parameters: any = {};
     
     //Selected Option definition:
@@ -45,161 +45,167 @@ export class WizardService {
         break
     }
 
-    //Start Basic Routine
-    folderID = this.createFolder(container);
-    this.createVariables(container, folderID, prefix);
-    this.createTrigger(container);
-
-    //Retrieve Variables
-    const Amount = this.savedVariables['Awin - Total Value']
-    const OrderID = this.savedVariables['Awin - Order ID']
-    const PLT = this.savedVariables['Awin - PLT']
-    const Coupon = this.savedVariables['Awin - Voucher']
-    const Cookie = this.savedVariables['AwinChannelCookie']
-
-    parameters = [
-      { key: 'advertiserID', type: 'TEMPLATE', value: AdvertiserID }
-    ];
-    this.importCommunityTag(container, this.mastertagID, "Awin - Mastertag", this.AllPagesTrigger, parameters)
-    
-    parameters = [
-      { key: 'cookie', type: 'TEMPLATE', value: 'AwinChannelCookie' }
-    ];
-    this.importCommunityTag(container, this.awLastId, "Awin - AW Last Click Identifier", this.AllPagesTrigger, parameters)
-    
-    parameters = [
-      { key: 'advertiserID', type: 'TEMPLATE', value: AdvertiserID },
-      { key: 'Amount', type: 'TEMPLATE', value: Amount },
-      { key: 'OrderID', type: 'TEMPLATE', value: OrderID },
-      { key: 'PLT', type: 'TEMPLATE', value: PLT },
-      { key: 'Coupon', type: 'TEMPLATE', value: Coupon },
-      { key: 'Cookie', type: 'TEMPLATE', value: Cookie }
-    ];
-    this.importCommunityTag(container, this.converionTagID, "Awin - Conversion Tag", this.AllPagesTrigger, parameters)
-  
+    this.startBasicRoutine(container,AdvertiserID,prefix)
   }
 
   //Create Awin folder
-  private createFolder(containerId: IContainer[]): any {
-    const body = {
-      name: 'Awin'
-    };
-  
+  private async createFolder(containerId: IContainer[]): Promise<void> {
+    const body = { name: 'Awin' };
     const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/default/folders`;
-    console.log("Creating Folder")
-    /*this.http.post(url, body, { headers: this.headers })
-      .subscribe(
-        (response) => {
-          console.log('Folder created successfully:', response);
-          return response.folderId;
-        },
-        (error) => {
-          console.error('Error creating folder:', error);
-        }
-      );*/
+    console.log("Creating Folder");
+
+    try {
+        const response = await this.http.post<any>(url, body, { headers: this.headers }).toPromise();
+        console.log('Folder created successfully:', response);
+        this.FolderID = response.folderId; // Save to instance variable
+    } catch (error) {
+        console.error('Error creating folder:', error);
+        this.FolderID = null;
+    }
   }
 
   //Create all used variables
-  private createVariables(containerId: IContainer[], folderId: string, prefix: string): void {
+  async createVariables(containerId: IContainer[], folderId: string, prefix: string): Promise<void> {
     const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/default/variables`;
 
-    // Define five specific variables with their configurations
+    // Define specific variables with configurations
     const variables = [
-      { name: 'AwinChannelCookie', type: '1stPartyCookie', cookieName: 'AwinChannelCookie' },
-      { name: 'Awin - Total Value', type: 'DataLayer', dataLayerKey: prefix+'value' },
-      { name: 'Awin - Order ID', type: 'DataLayer', dataLayerKey: prefix+'transaction_id' },
-      { name: 'Awin - Voucher', type: 'DataLayer', dataLayerKey: prefix+'coupon' },
-      { name: 'Awin - PLT', type: 'DataLayer', dataLayerKey: prefix+'items' }
+        { name: 'AwinChannelCookie', type: '1stPartyCookie', cookieName: 'AwinChannelCookie' },
+        { name: 'Awin - Total Value', type: 'DataLayer', dataLayerKey: prefix + 'value' },
+        { name: 'Awin - Order ID', type: 'DataLayer', dataLayerKey: prefix + 'transaction_id' },
+        { name: 'Awin - Voucher', type: 'DataLayer', dataLayerKey: prefix + 'coupon' },
+        { name: 'Awin - PLT', type: 'DataLayer', dataLayerKey: prefix + 'items' }
     ];
 
     const createdVariableIds: { [key: string]: string } = {};
 
-    // Loop through each variable and create it
+    // Loop through each variable and create it asynchronously
     console.log("Creating Variables");
-    variables.forEach(variable => {
-      const body = {
-        name: variable.name,
-        type: variable.type === '1stPartyCookie' ? '1stPartyCookie' : 'jsm', // Set the type
-        parameter: [
-          variable.type === '1stPartyCookie'
-            ? { key: 'cookieName', value: variable.cookieName }
-            : { key: 'dataLayerVersion', value: '2' },
-          ...(variable.type === 'DataLayer'
-            ? [{ key: 'dataLayerVariable', value: variable.dataLayerKey }]
-            : [])
-        ],
-        parentFolderId: folderId
-      };
-      createdVariableIds[variable.name] = "1";
-      /*
-      this.http.post(url, body, { headers: this.headers })
-        .subscribe(
-          response => {
+    for (const variable of variables) {
+        const body = {
+            name: variable.name,
+            type: variable.type === '1stPartyCookie' ? '1stPartyCookie' : 'jsm', // Set the type
+            parameter: [
+                variable.type === '1stPartyCookie'
+                    ? { key: 'cookieName', value: variable.cookieName }
+                    : { key: 'dataLayerVersion', value: '2' },
+                ...(variable.type === 'DataLayer'
+                    ? [{ key: 'dataLayerVariable', value: variable.dataLayerKey }]
+                    : [])
+            ],
+            parentFolderId: folderId
+        };
+
+        /*try {
+            const response = await this.http.post<any>(url, body, { headers: this.headers }).toPromise();
             console.log(`Variable "${variable.name}" created successfully:`, response);
-          },
-          error => {
+            createdVariableIds[variable.name] = response.variableId; // Assuming response contains variableId
+        } catch (error) {
             console.error(`Error creating variable "${variable.name}":`, error);
-          }
-        );*/
-    });
+        }*/
+    }
     this.savedVariables = createdVariableIds;
   }
 
   //Create Purchase trigger
-  createTrigger(containerId: IContainer[]): any {
+  private async createTrigger(containerId: IContainer[], folderId: string): Promise<void> {
     const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/default/triggers`;
     const body = {
-      name: 'Awin - Custom Trigger',
-      type: 'CUSTOM_EVENT',
-      customEventFilter: [
-        {
-          type: 'EQUALS',
-          parameter: [
+        name: 'Awin - Custom Trigger',
+        type: 'CUSTOM_EVENT',
+        customEventFilter: [
             {
-              type: 'TEMPLATE',
-              key: 'event',
-              value: 'purchase'
+                type: 'EQUALS',
+                parameter: [
+                    {
+                        type: 'TEMPLATE',
+                        key: 'event',
+                        value: 'purchase'
+                    }
+                ]
             }
-          ]
-        }
-      ],
-      filter: [], // Optional: specify additional filters if needed
+        ],
+        parentFolderId: folderId
     };
-    
-    console.log("Creating Trigger")
-    /*return this.http.post<any>(url, body, { headers: this.headers }).pipe(
-      map(response => {
+
+    console.log("Creating Trigger");
+    /*try {
+        const response = await this.http.post<any>(url, body, { headers: this.headers }).toPromise();
         console.log('Purchase Trigger created successfully:', response);
-        return response;
-      }),
-      catchError(error => {
+    } catch (error) {
         console.error('Error creating Purchase Trigger:', error);
-        throw error;
-      })
-    );*/
+    }*/
   }
 
+
   //Import Tags
-  importCommunityTag(containerId: IContainer[], tagTemplateId: string, tagName: string, trigger: string, parameters: any): any {
+  async importCommunityTag(containerId: IContainer[], tagTemplateId: string, tagName: string, trigger: string, parameters: any, folderId: string): Promise<void> {
     const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/default/tags`;
     
     const body = {
-      name: tagName,
-      type: 'template', // Specifies it’s a community template tag
-      tagTemplateId: tagTemplateId,
-      parameter: parameters, // Pass in any parameters required by the template
-      firingTriggerId: [trigger] // Replace with your desired trigger ID
+        name: tagName,
+        type: 'template', // Specifies it’s a community template tag
+        tagTemplateId: tagTemplateId,
+        parameter: parameters, // Pass in any parameters required by the template
+        firingTriggerId: [trigger], // Specify the trigger ID
+        parentFolderId: folderId // Add folder ID to place tag within the folder
     };
-    console.log(parameters)
-    /*return this.http.post<any>(url, body, { headers: this.headers }).pipe(
-      map(response => {
+    
+    console.log(parameters);
+    
+    /*try {
+        const response = await this.http.post<any>(url, body, { headers: this.headers }).toPromise();
         console.log(`${tagName} tag created successfully:`, response);
-        return response;
-      }),
-      catchError(error => {
+    } catch (error) {
         console.error(`Error creating ${tagName} tag:`, error);
-        throw error;
-      })
-    );*/
+    }*/
+  }
+
+  //Get All Pages Trigger
+  async getAllPagesTriggerId(containerId: IContainer[]): Promise<any> {
+    const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/triggers`;
+    console.log("Fetching All Pages Trigger ID");
+
+    try {
+        const response: any = await this.http.get(url, { headers: this.headers }).toPromise();
+        const allPagesTrigger = response.trigger.find((trigger: any) => trigger.name === 'All Pages');
+        this.AllPagesTrigger = allPagesTrigger ? allPagesTrigger.triggerId : null;
+        console.log('All Pages Trigger ID:', this.AllPagesTrigger);
+    } catch (error) {
+        console.error('Error fetching trigger ID:', error);
+        this.AllPagesTrigger = null;
+    }
+  }
+
+  async startBasicRoutine(container: IContainer[], AdvertiserID: any, prefix: string) {
+    await this.createFolder(container);
+    await this.createVariables(container, this.FolderID, prefix);
+    await this.createTrigger(container, this.FolderID);
+
+    // Retrieve Variables after they are set up
+    const Amount = this.savedVariables['Awin - Total Value'];
+    const OrderID = this.savedVariables['Awin - Order ID'];
+    const PLT = this.savedVariables['Awin - PLT'];
+    const Coupon = this.savedVariables['Awin - Voucher'];
+    const Cookie = this.savedVariables['AwinChannelCookie'];
+    
+    await this.getAllPagesTriggerId(container);
+    
+    // Now that FolderID and AllPagesTrigger are defined, import tags
+    let parameters = [{ key: 'advertiserID', type: 'TEMPLATE', value: AdvertiserID }];
+    await this.importCommunityTag(container, this.mastertagID, "Awin - Mastertag", this.AllPagesTrigger, parameters, this.FolderID);
+
+    parameters = [{ key: 'cookie', type: 'TEMPLATE', value: 'AwinChannelCookie' }];
+    await this.importCommunityTag(container, this.awLastId, "Awin - AW Last Click Identifier", this.AllPagesTrigger, parameters, this.FolderID);
+
+    parameters = [
+        { key: 'advertiserID', type: 'TEMPLATE', value: AdvertiserID },
+        { key: 'Amount', type: 'TEMPLATE', value: Amount },
+        { key: 'OrderID', type: 'TEMPLATE', value: OrderID },
+        { key: 'PLT', type: 'TEMPLATE', value: PLT },
+        { key: 'Coupon', type: 'TEMPLATE', value: Coupon },
+        { key: 'Cookie', type: 'TEMPLATE', value: Cookie }
+    ];
+    await this.importCommunityTag(container, this.converionTagID, "Awin - Conversion Tag", this.AllPagesTrigger, parameters, this.FolderID);
   }
 }
