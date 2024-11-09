@@ -15,6 +15,8 @@ export class WizardService {
     'Content-Type': 'application/json'
   });
   private readonly mastertagID = "1"
+  private readonly converionTagID = "1"
+  private readonly awLastId = "1"
   private readonly AllPagesTrigger = "1"
   private savedVariables: { [key: string]: string } = {};
 
@@ -63,7 +65,7 @@ export class WizardService {
     parameters = [
       { key: 'cookie', type: 'TEMPLATE', value: 'AwinChannelCookie' }
     ];
-    this.importCommunityTag(container, this.mastertagID, "Awin - Mastertag", this.AllPagesTrigger, parameters)
+    this.importCommunityTag(container, this.awLastId, "Awin - AW Last Click Identifier", this.AllPagesTrigger, parameters)
     
     parameters = [
       { key: 'advertiserID', type: 'TEMPLATE', value: AdvertiserID },
@@ -73,7 +75,7 @@ export class WizardService {
       { key: 'Coupon', type: 'TEMPLATE', value: Coupon },
       { key: 'Cookie', type: 'TEMPLATE', value: Cookie }
     ];
-    this.importCommunityTag(container, this.mastertagID, "Awin - Mastertag", this.AllPagesTrigger, parameters)
+    this.importCommunityTag(container, this.converionTagID, "Awin - Conversion Tag", this.AllPagesTrigger, parameters)
   
   }
 
