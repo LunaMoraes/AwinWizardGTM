@@ -1,0 +1,51 @@
+<div class="container">
+    <h2 class="header-text">Awin GTM Wizard</h2>
+    
+   <div class="centered">
+      <label class="description-text centered" for="gtm-container">Enter GTM Container ID:</label>
+      <input class="input-field  gtmField"
+        type="text"
+        id="gtm-container"
+        [(ngModel)]="gtmContainer"
+        placeholder="GTM-XXXXXXX"
+      />
+    </div>
+    <br>
+    <div class="centered">
+      <label class="description-text centered" for="gtm-container">Enter Advertiser ID:</label>
+      <input class="input-field  gtmField"
+        type="text"
+        id="advertiserID"
+        [(ngModel)]="advertiserID"
+        placeholder="XXXXXXX"
+      />
+    </div>
+    <br>
+    <div class="centered">
+      <div class="label-container description-text">
+        <label>Choose Installation Option:</label>
+      </div>
+      <div class="options-container">
+        <div *ngFor="let option of installationOptions" class="spacing">
+          <div class="input-field">
+            <input 
+              type="radio"
+              [id]="option.label"
+              name="installOption"
+              [value]="option.id"
+              class="radio-color"
+              [(ngModel)]="selectedOption"
+            />
+            <label class="spacing-left" [for]="option.label">{{ option.label }}</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="centered">
+      <button class="big-button" (click)="onSubmit()" [disabled]="!gtmContainer || !selectedOption">
+        Submit
+      </button>
+  </div>
+</div>
+  
