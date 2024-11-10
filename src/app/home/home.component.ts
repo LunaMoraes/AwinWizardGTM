@@ -29,13 +29,22 @@ export class HomeComponent {
   ];
   requestStatus: string = 'stopped';
   errorMessage: any;
+  devToolsActive: boolean = false;
+  authed: boolean = false;
   
   constructor(private WizardService: WizardService, private authService: AuthenticationService) {}
   startLogin(): void {
     this.authService.signIn();
+    this.authed = true;
   }
 
-  
+  toggleDevTools(){
+    if(this.devToolsActive == true){
+      this.devToolsActive = false;
+    }else{
+      this.devToolsActive = true;
+    }
+  }
   // Method to fetch containers
   fetchContainers(): void {
     this.authService.fetchContainers()

@@ -1,15 +1,21 @@
-<div class="container">
+<div class="container flex-line">
+  <div class="leftpanel">
+    <br><br><br><br><br>
+    <button class="small-button" (click)="toggleDevTools()">Toggle Dev Tools</button>
+      <div *ngIf="devToolsActive === true" class="dev-tools">
+        <button class="small-button"  (click)="fetchContainers()">Fetch Containers</button>
+        <button class="small-button"  (click)="fetchVariables()">Fetch All Variables</button>
+        <button class="small-button"  (click)="fetchTriggers()">Fetch All Triggers</button>
+        <button class="small-button"  (click)="fetchTags()">Fetch All Tags</button>
+        <button class="small-button"  (click)="fetchTemplates()">Fetch Templates</button>
+        <button class="small-button"  (click)="fetchAccountId()">Test Fetch Account ID</button>
+      </div>
+  </div>
+  <div class="rightpanel">
     <h2 class="header-text">Awin GTM Wizard</h2>
-    <button (click)="startLogin()">Login with Google</button>
-    <button (click)="fetchContainers()">Fetch Containers</button>
-    <button (click)="fetchVariables()">Fetch All Variables</button>
-    <button (click)="fetchTriggers()">Fetch All Triggers</button>
-    <button (click)="fetchTags()">Fetch All Tags</button>
-    <button (click)="fetchTemplates()">Fetch Templates</button>
-    <button (click)="fetchAccountId()">Test Fetch Account ID</button>
-
 
     <div class="centered">
+      <button class="small-button" (click)="startLogin()">Login with Google</button><br>
       <label class="description-text centered" for="gtm-container">Enter GTM Container ID:</label>
       <input class="input-field  gtmField"
         type="text"
@@ -55,7 +61,7 @@
         <span class="visually-hidden">Loading...</span>
       </div>
       <br>
-      <button class="big-button" (click)="onSubmit()" [disabled]="!gtmContainer || !selectedOption || requestStatus == 'in-progress'">
+      <button class="big-button" (click)="onSubmit()" [disabled]="authed==false || !gtmContainer || !selectedOption || requestStatus == 'in-progress'">
         Submit
       </button>
       <br>
@@ -65,6 +71,7 @@
       <div *ngIf="requestStatus === 'error'" class="alert alert-danger" role="alert">
         {{ errorMessage }}
       </div>
+    </div>
   </div>
 </div>
   
