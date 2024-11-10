@@ -183,6 +183,39 @@ export class AuthenticationService {
     }
   }
   
+  async fetchTemplates(containerId: string, workspaceId: string): Promise<any> {
+    const accessToken = sessionStorage.getItem('accessToken');
+    if (!accessToken) {
+        throw new Error("User is not authenticated.");
+    }
+
+    const accountId = environment.ACCOUNT_ID;
+    const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch templates: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched templates:", data);
+        data.template.forEach((template: any) => {
+            console.log(`Template Name: ${template.name}, Template ID: ${template.templateId}, Parameters:`, template.parameter);
+        });
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching templates:", error);
+        throw error;
+    }
+  }
+
   // Sign-out method
   signOut(): void {
     // Clear the token from session storage

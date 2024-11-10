@@ -62,6 +62,13 @@ export class HomeComponent {
       console.error("Error fetching tags:", error);
     });
   }
+  fetchTemplates(): void {
+    this.authService.fetchTemplates(environment.CONTAINER_ID, '2').then(templates => {
+        console.log("Templates fetched successfully:", templates);
+    }).catch(error => {
+        console.error("Error fetching templates:", error);
+    });
+  }
   // Handle form submission
   onSubmit(): void {
     if (!this.gtmContainer || !this.selectedOption || !this.advertiserID) {
