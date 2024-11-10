@@ -9,7 +9,6 @@ import { AuthenticationService } from '../Services/authentication.service';
 })
 export class WizardService {
 
-  private readonly accountId = environment.ACCOUNT_ID;
   private readonly AllPagesTrigger = environment.ALL_PAGES_TRIGGER;
   private readonly apiUrl = 'https://www.googleapis.com/tagmanager/v2';
   private headers = new HttpHeaders({
@@ -22,7 +21,9 @@ export class WizardService {
   private readonly awLastId = "1";
   private savedVariables: { [key: string]: string } = {};
   private FolderID: any = {};
+  private accountId: any = undefined;
   private customTriggerId: any = {};
+  private isFetchComplete = false;
 
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
@@ -30,6 +31,9 @@ export class WizardService {
   async startSetup(container: IContainer[], optionId: number, AdvertiserID: number): Promise<void> {
     console.log('Starting setup | Option ID:', optionId, '| Advertiser ID:', AdvertiserID);
     let prefix = this.getPrefix(optionId);
+
+    //Grab account ID for future requests
+    await this.fetchAccountId(container);
     
     // Fetch containers to get the numeric containerId
     try {
@@ -134,9 +138,22 @@ export class WizardService {
         console.error('Error creating folder:', error);
         this.FolderID = null;
     }
-}
+  }
 
-
+  //Get ID
+  private async fetchAccountId(container: IContainer[]){
+    await this.authService.fetchAccountIdByContainerPublicId(container)
+      .then(accountId => {
+        this.accountId = accountId;
+        this.isFetchComplete = true;
+        console.log("Account ID fetched successfully:", accountId);
+      })
+      .catch(error => {
+        console.error("Error fetching account ID:", error);
+        return
+      });
+  }
+  
   // Variable creation
   private async createVariables(containerId: number, workspaceId: string, folderId: string, prefix: string): Promise<void> {
     const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/variables`;
@@ -248,7 +265,6 @@ export class WizardService {
         return null;
     }
   }
-
 
   // Tag import
   private async importCommunityTag(

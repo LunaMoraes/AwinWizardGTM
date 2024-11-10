@@ -46,28 +46,37 @@ export class HomeComponent {
       });
   }
   fetchVariables(): void {
-    this.authService.fetchVariables(environment.CONTAINER_ID, '2');
+    this.authService.fetchVariables(environment.TEST_CONTAINER_ID, '2');
   }
   fetchTriggers(): void {
-    this.authService.fetchTriggers(environment.CONTAINER_ID, '2').then(triggers => {
+    this.authService.fetchTriggers(environment.TEST_CONTAINER_ID, '2').then(triggers => {
       console.log("Triggers fetched successfully:", triggers);
     }).catch(error => {
       console.error("Error fetching triggers:", error);
     });
   }
   fetchTags(): void {
-    this.authService.fetchTags(environment.CONTAINER_ID, '2').then(tags => {
+    this.authService.fetchTags(environment.TEST_CONTAINER_ID, '2').then(tags => {
       console.log("Tags fetched successfully:", tags);
     }).catch(error => {
       console.error("Error fetching tags:", error);
     });
   }
   fetchTemplates(): void {
-    this.authService.fetchTemplates(environment.CONTAINER_ID, '2').then(templates => {
+    this.authService.fetchTemplates(environment.TEST_CONTAINER_ID, '2').then(templates => {
         console.log("Templates fetched successfully:", templates);
     }).catch(error => {
         console.error("Error fetching templates:", error);
     });
+  }
+  fetchAccountId(): void {
+    this.authService.fetchAccountIdByContainerPublicId('GTM-MPZ95TMZ')
+      .then(accountId => {
+        console.log("Account ID fetched successfully:", accountId);
+      })
+      .catch(error => {
+        console.error("Error fetching account ID:", error);
+      });
   }
   // Handle form submission
   onSubmit(): void {

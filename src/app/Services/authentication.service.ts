@@ -51,7 +51,7 @@ export class AuthenticationService {
       throw new Error("User is not authenticated.");
     }
 
-    const accountId = environment.ACCOUNT_ID;
+    const accountId = environment.TEST_ACCOUNT_ID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers`;
 
     const response = await fetch(url, {
@@ -73,7 +73,7 @@ export class AuthenticationService {
       throw new Error("User is not authenticated.");
     }
 
-    const accountId = environment.ACCOUNT_ID;
+    const accountId = environment.TEST_ACCOUNT_ID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/variables`;
 
     const response = await fetch(url, {
@@ -102,7 +102,7 @@ export class AuthenticationService {
       throw new Error("User is not authenticated.");
     }
 
-    const accountId = environment.ACCOUNT_ID;
+    const accountId = environment.TEST_ACCOUNT_ID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/tags`;
 
     const response = await fetch(url, {
@@ -131,7 +131,7 @@ export class AuthenticationService {
       throw new Error("User is not authenticated.");
     }
 
-    const accountId = environment.ACCOUNT_ID;
+    const accountId = environment.TEST_ACCOUNT_ID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/triggers`;
 
     const response = await fetch(url, {
@@ -189,7 +189,7 @@ export class AuthenticationService {
         throw new Error("User is not authenticated.");
     }
 
-    const accountId = environment.ACCOUNT_ID;
+    const accountId = environment.TEST_ACCOUNT_ID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
 
     try {
@@ -216,6 +216,59 @@ export class AuthenticationService {
     }
   }
 
+
+  async fetchAccountIdByContainerPublicId(containerPublicId: any): Promise<string | null> {
+    const accessToken = sessionStorage.getItem('accessToken');
+    if (!accessToken) {
+        throw new Error("User is not authenticated.");
+    }
+
+    const apiUrl = 'https://tagmanager.googleapis.com/tagmanager/v2/accounts';
+
+    try {
+        const accountsResponse = await fetch(apiUrl, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!accountsResponse.ok) {
+            throw new Error(`Failed to fetch accounts: ${accountsResponse.statusText}`);
+        }
+
+        const accountsData = await accountsResponse.json();
+        
+        for (const account of accountsData.account) {
+            const containersResponse = await fetch(`${apiUrl}/${account.accountId}/containers`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!containersResponse.ok) {
+                throw new Error(`Failed to fetch containers for account ${account.accountId}: ${containersResponse.statusText}`);
+            }
+
+            const containersData = await containersResponse.json();
+
+            // Check if any container has the matching public ID
+            const matchingContainer = containersData.container.find(
+                (container: any) => container.publicId === containerPublicId
+            );
+
+            if (matchingContainer) {
+                console.log(`Found container with public ID ${containerPublicId} in account ID ${account.accountId}`);
+                return account.accountId;
+            }
+        }
+
+        console.log(`No container with public ID ${containerPublicId} found.`);
+        return null;
+    } catch (error) {
+        console.error("Error fetching account ID by container public ID:", error);
+        throw error;
+    }
+  }
   // Sign-out method
   signOut(): void {
     // Clear the token from session storage
