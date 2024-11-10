@@ -10,6 +10,7 @@ import { AuthenticationService } from '../Services/authentication.service';
 export class WizardService {
 
   private readonly accountId = environment.ACCOUNT_ID;
+  private readonly AllPagesTrigger = environment.ALL_PAGES_TRIGGER;
   private readonly apiUrl = 'https://www.googleapis.com/tagmanager/v2';
   private headers = new HttpHeaders({
     Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
@@ -20,7 +21,6 @@ export class WizardService {
   private readonly converionTagID = "1";
   private readonly awLastId = "1";
   private savedVariables: { [key: string]: string } = {};
-  private AllPagesTrigger: any = {};
   private FolderID: any = {};
   private customTriggerId: any = {};
 
@@ -76,10 +76,8 @@ export class WizardService {
     const Coupon = this.savedVariables['Awin - Voucher'];
     const Cookie = this.savedVariables['AwinChannelCookie'];
     
-    await this.getAllPagesTriggerId(this.containerId, workspaceId);
-    
     let parameters = [{ key: 'advertiserId', type: 'TEMPLATE', value: AdvertiserID }];
-    await this.importCommunityTag(this.containerId, workspaceId, "cvt_199645065_41", "Awin - Mastertag", '2147479553', parameters, this.FolderID);
+    await this.importCommunityTag(this.containerId, workspaceId, "cvt_199645065_127", "Awin - Mastertag", this.AllPagesTrigger, parameters, this.FolderID);
     
     parameters = [
       { key: 'sourceParameters', type: 'template', value: 'utm_source,source,gclid,fbclid' },
@@ -93,9 +91,9 @@ export class WizardService {
     await this.importCommunityTag(
         this.containerId,
         workspaceId,
-        "cvt_199645065_58",
+        "cvt_199645065_128",
         "Awin - AW Last Click Identifier",
-        '2147479553',
+        this.AllPagesTrigger,
         parameters,
         this.FolderID
     );
@@ -116,7 +114,7 @@ export class WizardService {
     await this.importCommunityTag(
       this.containerId,
       workspaceId,
-      "cvt_199645065_69", // The community template type ID for the conversion tag
+      "cvt_199645065_126", // The community template type ID for the conversion tag
       "Awin - Conversion Tag",
       this.customTriggerId, // Use the custom trigger created earlier
       parameters,
@@ -288,18 +286,4 @@ export class WizardService {
     }
   }
 
-  // Get All Pages Trigger ID
-  private async getAllPagesTriggerId(containerId: number, workspaceId: string): Promise<void> {
-    const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/triggers`;
-
-    try {
-        const response: any = await this.http.get(url, { headers: this.headers }).toPromise();
-        const allPagesTrigger = response.trigger.find((trigger: any) => trigger.name === 'All Pages');
-        this.AllPagesTrigger = allPagesTrigger ? allPagesTrigger.triggerId : null;
-        console.log('All Pages Trigger ID:', this.AllPagesTrigger);
-    } catch (error) {
-        console.error('Error fetching trigger ID:', error);
-        this.AllPagesTrigger = null;
-    }
-}
 }
