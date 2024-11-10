@@ -24,6 +24,12 @@ export class WizardService {
   private accountId: any = undefined;
   private customTriggerId: any = {};
   private isFetchComplete = false;
+  private MasterTagPublicID: any = {};
+  private MasterTagTemplateID: any = 127;
+  private LastClickPublicID: any = {};
+  private LastClickTemplateID: any = 128;
+  private ConversionTagPublicID: any = {};
+  private ConversionTemplateID: any = 126;
 
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
@@ -74,6 +80,8 @@ export class WizardService {
 
   // Basic setup routine
   private async startBasicRoutine(container: IContainer[], AdvertiserID: any, prefix: string, workspaceId: string) {
+    let parameters:any = [];
+    
     await this.createFolder(workspaceId);
     
     await this.createVariables(this.containerId, workspaceId, this.FolderID, prefix);
@@ -84,9 +92,14 @@ export class WizardService {
     const PLT = this.savedVariables['Awin - PLT'];
     const Coupon = this.savedVariables['Awin - Voucher'];
     const Cookie = this.savedVariables['AwinChannelCookie'];
-    
-    let parameters = [{ key: 'advertiserId', type: 'TEMPLATE', value: AdvertiserID }];
-    await this.importCommunityTag(this.containerId, workspaceId, "cvt_199645065_127", "Awin - Mastertag", this.AllPagesTrigger, parameters, this.FolderID);
+
+    await this.waitTimeout() //Removing chance of getting denial
+    this.MasterTagPublicID = 'cvt_'+this.containerId+"_"+this.MasterTagTemplateID
+    this.LastClickPublicID = 'cvt_'+this.containerId+"_"+this.LastClickTemplateID
+    this.ConversionTagPublicID = 'cvt_'+this.containerId+"_"+this.ConversionTemplateID
+
+    parameters = [{ key: 'advertiserId', type: 'TEMPLATE', value: AdvertiserID }];
+    await this.importCommunityTag(this.containerId, workspaceId, this.MasterTagPublicID, "Awin - Mastertag", this.AllPagesTrigger, parameters, this.FolderID);
     
     parameters = [
       { key: 'sourceParameters', type: 'template', value: 'utm_source,source,gclid,fbclid' },
@@ -100,7 +113,7 @@ export class WizardService {
     await this.importCommunityTag(
         this.containerId,
         workspaceId,
-        "cvt_199645065_128",
+        this.LastClickPublicID,
         "Awin - AW Last Click Identifier",
         this.AllPagesTrigger,
         parameters,
@@ -123,7 +136,7 @@ export class WizardService {
     await this.importCommunityTag(
       this.containerId,
       workspaceId,
-      "cvt_199645065_126", // The community template type ID for the conversion tag
+      this.ConversionTagPublicID, // The community template type ID for the conversion tag
       "Awin - Conversion Tag",
       this.customTriggerId, // Use the custom trigger created earlier
       parameters,
@@ -310,5 +323,41 @@ export class WizardService {
         throw new Error("Tags couldn't be imported.");
     }
   }
+  private async importCommunityTemplate(
+    containerId: number,
+    workspaceId: string,
+    templateName: string,
+    templateId: string,
+    parameters: any[],
+    folderId: string
+  ): Promise<void> {
+  const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
 
+    const body = {
+      name: templateName,
+      templateId: templateId, // The provided template ID (if required by GTM)
+      parameter: parameters.map(param => ({
+        key: param.key,
+        type: 'template',
+        value: param.value
+      })),
+      parentFolderId: folderId
+    };
+
+    try {
+      const response = await this.http.post<any>(url, body, { headers: this.headers }).toPromise();
+      console.log(`${templateName} template created successfully:`, response);
+    } catch (error) {
+      console.error(`Error creating ${templateName} template:`, error);
+      throw new Error("Template couldn't be imported.");
+    }
+  }
+
+  //This function exists because otherwise we would get errors for utilising the API too quickly
+  private waitTimeout() {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 30000); // 1 minute = 60000 milliseconds
+    });
+  }
+  
 }

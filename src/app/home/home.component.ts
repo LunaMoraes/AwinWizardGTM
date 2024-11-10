@@ -30,6 +30,7 @@ export class HomeComponent {
   requestStatus: string = 'stopped';
   errorMessage: any;
   devToolsActive: boolean = false;
+  warn: boolean = false;
   authed: boolean = false;
   
   constructor(private WizardService: WizardService, private authService: AuthenticationService) {}
@@ -88,6 +89,45 @@ export class HomeComponent {
       .catch(error => {
         console.error("Error fetching account ID:", error);
       });
+  }
+
+  // Validator for GTM Container ID (must match GTM- followed by digits)
+  isValidGTMContainer(gtmContainer: any): boolean {
+    const gtmPattern = /^GTM-[A-Z0-9]{7,}$/i;
+    return gtmPattern.test(gtmContainer);
+  }
+
+  // Validator for Advertiser ID (must be numeric and of length 7)
+  isValidAdvertiserID(id: any): boolean {
+    const advertiserIdPattern = /^\d{5,}$/;
+    if (!advertiserIdPattern.test(id)) {
+      return false;
+    }
+    
+    // Convert to a number and check if it is even
+    const idNumber = parseInt(id, 10);
+    return idNumber % 2 === 0;
+  }
+
+  // Function to check all validations before submission
+  validateInputs(): boolean {
+    if (!this.isValidGTMContainer(this.gtmContainer)) {
+      this.errorMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
+      this.warn = true;
+      return false;
+    } else if (!this.isValidAdvertiserID(this.advertiserID)) {
+      this.errorMessage = 'Invalid Advertiser ID. It should be a 5-digit number.';
+      this.warn = true;
+      return false;
+    }
+    this.errorMessage = ''; // Clear error message if all validations pass
+    this.warn = false;
+    return true;
+  }
+
+  testValidation(){
+    this.validateInputs();
+    console.log(this.errorMessage)
   }
   // Handle form submission
   onSubmit(): void {

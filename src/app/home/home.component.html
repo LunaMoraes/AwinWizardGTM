@@ -9,18 +9,20 @@
         <button class="small-button"  (click)="fetchTags()">Fetch All Tags</button>
         <button class="small-button"  (click)="fetchTemplates()">Fetch Templates</button>
         <button class="small-button"  (click)="fetchAccountId()">Test Fetch Account ID</button>
+        <button class="small-button"  (click)="testValidation()">Test Validation</button>
       </div>
   </div>
   <div class="rightpanel">
     <h2 class="header-text">Awin GTM Wizard</h2>
 
     <div class="centered">
-      <button class="small-button" (click)="startLogin()">Login with Google</button><br>
+      <button class="google-btn" (click)="startLogin()">Login with Google</button><br>
       <label class="description-text centered" for="gtm-container">Enter GTM Container ID:</label>
       <input class="input-field  gtmField"
         type="text"
         id="gtm-container"
         [(ngModel)]="gtmContainer"
+        (blur)="testValidation()"
         placeholder="GTM-XXXXXXX"
       />
     </div>
@@ -31,6 +33,7 @@
         type="text"
         id="advertiserID"
         [(ngModel)]="advertiserID"
+        (blur)="testValidation()"
         placeholder="XXXXXXX"
       />
     </div>
@@ -57,14 +60,16 @@
     </div>
     <br>
     <div class="centered">
-      <div *ngIf="requestStatus === 'in-progress'" class="spinner-border text-warning" role="status">
+      <div *ngIf="requestStatus === 'in-progress'" class="margin-bot spinner-border text-warning" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <br>
-      <button class="big-button" (click)="onSubmit()" [disabled]="authed==false || !gtmContainer || !selectedOption || requestStatus == 'in-progress'">
+      <button class="big-button" (click)="onSubmit()" [disabled]="authed==false || !validateInputs() || requestStatus == 'in-progress'">
         Submit
       </button>
       <br>
+      <div *ngIf="warn === true" class="alert alert-warning" role="alert">
+        {{ errorMessage }}
+      </div>
       <div *ngIf="requestStatus === 'success'" class="alert alert-success" role="alert">
         The setup has finished sucessfully!
       </div>
