@@ -134,6 +134,10 @@ export class HomeComponent {
     console.log(this.warnMessage)
     console.log(this.errorMessage)
   }
+  signOut(){
+    this.authService.signOut();
+    this.authed = false;
+  }
   // Handle form submission
   onSubmit(): void {
     if (!this.gtmContainer || !this.selectedOption || !this.advertiserID) {

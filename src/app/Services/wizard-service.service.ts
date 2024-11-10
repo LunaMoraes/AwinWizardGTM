@@ -81,7 +81,11 @@ export class WizardService {
   // Basic setup routine
   private async startBasicRoutine(container: IContainer[], AdvertiserID: any, prefix: string, workspaceId: string) {
     let parameters:any = [];
-    
+    this.headers = new HttpHeaders({
+      Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+      'Content-Type': 'application/json'
+    });
+
     await this.createFolder(workspaceId);
     
     await this.createVariables(this.containerId, workspaceId, this.FolderID, prefix);
