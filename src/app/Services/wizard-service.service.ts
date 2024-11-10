@@ -81,6 +81,8 @@ export class WizardService {
   // Basic setup routine
   private async startBasicRoutine(container: IContainer[], AdvertiserID: any, prefix: string, workspaceId: string) {
     let parameters:any = [];
+
+    //ensuring that the headers are not null
     this.headers = new HttpHeaders({
       Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
       'Content-Type': 'application/json'

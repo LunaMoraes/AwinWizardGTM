@@ -128,7 +128,6 @@ export class HomeComponent {
 
   testValidation(){
     this.validateInputs();
-    console.log(this.errorMessage)
   }
   logErrors(){
     console.log(this.warnMessage)
