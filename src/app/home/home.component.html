@@ -1,7 +1,13 @@
 <div class="container">
     <h2 class="header-text">Awin GTM Wizard</h2>
-    
-   <div class="centered">
+    <button (click)="startLogin()">Login with Google</button>
+    <button (click)="fetchContainers()">Fetch Containers</button>
+    <button (click)="fetchVariables()">Fetch All Variables</button>
+    <button (click)="fetchTriggers()">Fetch All Triggers</button>
+    <button (click)="fetchTags()">Fetch All Tags</button>
+
+
+    <div class="centered">
       <label class="description-text centered" for="gtm-container">Enter GTM Container ID:</label>
       <input class="input-field  gtmField"
         type="text"
