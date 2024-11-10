@@ -142,6 +142,7 @@ export class WizardService {
     } catch (error) {
         console.error('Error creating folder:', error);
         this.FolderID = null;
+        throw new Error("Folder Couldn't be Created.");
     }
   }
 
@@ -155,7 +156,7 @@ export class WizardService {
       })
       .catch(error => {
         console.error("Error fetching account ID:", error);
-        return
+        throw new Error("Account ID Couldn't be found.");
       });
   }
   
@@ -225,6 +226,7 @@ export class WizardService {
             createdVariableIds[variable.name] = response.variableId; // Assuming response contains variableId
         } catch (error) {
             console.error(`Error creating variable "${variable.name}":`, error);
+            throw new Error("Variables couldn't be created. Check log for more details.");
         }
     }
 
@@ -267,6 +269,7 @@ export class WizardService {
         return triggerId;
     } catch (error) {
         console.error('Error creating trigger:', error);
+        throw new Error("Trigger couldn't be created.");
         return null;
     }
   }
@@ -304,6 +307,7 @@ export class WizardService {
         console.log(`${tagName} tag created successfully:`, response);
     } catch (error) {
         console.error(`Error creating ${tagName} tag:`, error);
+        throw new Error("Tags couldn't be imported.");
     }
   }
 
