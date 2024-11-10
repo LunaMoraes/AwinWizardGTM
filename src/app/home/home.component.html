@@ -51,6 +51,10 @@
     </div>
     <br>
     <div class="centered">
+      <div *ngIf="requestStatus === 'in-progress'" class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <br>
       <button class="big-button" (click)="onSubmit()" [disabled]="!gtmContainer || !selectedOption || requestStatus == 'in-progress'">
         Submit
       </button>
