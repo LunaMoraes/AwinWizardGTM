@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ExampleComponent } from './example/example.component';
 
@@ -12,4 +12,11 @@ import { ExampleComponent } from './example/example.component';
 })
 export class AppComponent {
   title = 'AwinWizardGTM';
+  @ViewChild('backgroundVideo') backgroundVideo!: ElementRef<HTMLVideoElement>;
+  
+  ngAfterViewInit() {
+    this.backgroundVideo.nativeElement.play().catch(error => {
+      console.log('Autoplay was prevented:', error);
+    });
+  }
 }

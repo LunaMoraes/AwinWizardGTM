@@ -1,6 +1,5 @@
 <div class="container flex-line">
   <div class="leftpanel">
-    <br><br><br><br><br>
     <button class="small-button" (click)="toggleDevTools()">Toggle Dev Tools</button>
       <div *ngIf="devToolsActive === true" class="dev-tools">
         <button class="small-button"  (click)="fetchContainers()">Fetch Containers</button>
@@ -10,6 +9,7 @@
         <button class="small-button"  (click)="fetchTemplates()">Fetch Templates</button>
         <button class="small-button"  (click)="fetchAccountId()">Test Fetch Account ID</button>
         <button class="small-button"  (click)="testValidation()">Test Validation</button>
+        <button class="small-button"  (click)="logErrors()">Log errors</button>
       </div>
   </div>
   <div class="rightpanel">
@@ -44,7 +44,7 @@
       <div class="options-container">
         <div *ngFor="let option of installationOptions" class="spacing">
           <div class="input-field">
-            <input 
+            <input
               type="radio"
               [id]="option.label"
               name="installOption"
@@ -52,7 +52,7 @@
               class="radio-color"
               [(ngModel)]="selectedOption"
             />
-            <label class="spacing-left" [for]="option.label">{{ option.label }}</label>
+            <label class="spacing-left bold" [for]="option.label">{{ option.label }}</label>
           </div>
         </div>
       </div>
@@ -67,7 +67,7 @@
       </button>
       <br>
       <div *ngIf="warn === true" class="alert alert-warning" role="alert">
-        {{ errorMessage }}
+        {{ warnMessage }}
       </div>
       <div *ngIf="requestStatus === 'success'" class="alert alert-success" role="alert">
         The setup has finished sucessfully!

@@ -29,6 +29,7 @@ export class HomeComponent {
   ];
   requestStatus: string = 'stopped';
   errorMessage: any;
+  warnMessage: any;
   devToolsActive: boolean = false;
   warn: boolean = false;
   authed: boolean = false;
@@ -112,21 +113,25 @@ export class HomeComponent {
   // Function to check all validations before submission
   validateInputs(): boolean {
     if (!this.isValidGTMContainer(this.gtmContainer)) {
-      this.errorMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
+      this.warnMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
       this.warn = true;
       return false;
     } else if (!this.isValidAdvertiserID(this.advertiserID)) {
-      this.errorMessage = 'Invalid Advertiser ID. It should be a 5-digit number.';
+      this.warnMessage = 'Invalid Advertiser ID. It should be a 5-digit number.';
       this.warn = true;
       return false;
     }
-    this.errorMessage = ''; // Clear error message if all validations pass
+    this.warnMessage = ''; // Clear error message if all validations pass
     this.warn = false;
     return true;
   }
 
   testValidation(){
     this.validateInputs();
+    console.log(this.errorMessage)
+  }
+  logErrors(){
+    console.log(this.warnMessage)
     console.log(this.errorMessage)
   }
   // Handle form submission

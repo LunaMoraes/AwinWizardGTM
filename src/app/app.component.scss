@@ -47,7 +47,7 @@
 }
 
 .gtmField {
-  max-width: 15%;
+  max-width: 20%;
   text-align: center;
 }
 
@@ -56,10 +56,10 @@
   @extend .form-control;
   padding: 0.75rem;
   font-size: 1rem;
-  border: 1px solid #ddbfa2;
+  border: 1px solid #d8c6b6c0;
   border-radius: 0.25rem;
   color: #333;
-  background-color: #ddbfa2;
+  background-color: #d8c6b6c0;
 
   &:focus {
     border-color: #8B1E1E; /* Custom focus color */
@@ -102,15 +102,20 @@
 }
 
 .radio-color {
-accent-color: #ff6501;
-outline: none;
-box-shadow: none;
+  accent-color: #ff6501;
+  outline: none;
+  box-shadow: none;
+  
+}
+
+.bold{
+  font-weight: bold;
 }
 
 .radio-color:checked {
-accent-color: #bd4b01;
-outline: none;
-box-shadow: none;
+  accent-color: #bd4b01;
+  outline: none;
+  box-shadow: none;
 }
 
 .selection-box-label {
@@ -122,17 +127,18 @@ box-shadow: none;
 }
 
 .spacing {
-padding-left: 1.5%;
-display: inline-flex;
-flex-direction: row;
-justify-content: center;
-min-width: 20vw;
+  padding-left: 1.5%;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  min-width: 20vw;
 }
 .spacing-left {
-padding-left: 10px;
+  padding-left: 10px;
 }
 
 .leftpanel{
+  margin-top: 5%;
   min-width: 13vw;
 }
 .rightpanel{
@@ -182,6 +188,7 @@ padding-left: 10px;
     margin-top: 1%;
     margin-left: 0.5%;
     max-width: 130px;
+    background-color: #6c757d98;
 }
 
 .margin-bot{
