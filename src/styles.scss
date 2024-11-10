@@ -23,7 +23,7 @@ html, body, .container * {
     }
     &:disabled, 
     &.disabled {
-      background-color: #ff6500; /* Light orange for disabled state */
+      background-color: #db976a; /* Light orange for disabled state */
       color: #ffffff; /* Keep text color white for readability */
       cursor: not-allowed; /* Change cursor to indicate it's disabled */
       opacity: 0.7; /* Optional: adjust opacity to make the button look inactive */

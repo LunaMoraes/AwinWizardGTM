@@ -28,7 +28,7 @@ export class WizardService {
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
   // Function to start the setup
-  async startSetup(container: IContainer[], optionId: number, AdvertiserID: number): Promise<void> {
+  async startSetup(container: IContainer[], optionId: number, AdvertiserID: number): Promise<{ status: string, message?: any }> {
     console.log('Starting setup | Option ID:', optionId, '| Advertiser ID:', AdvertiserID);
     let prefix = this.getPrefix(optionId);
 
@@ -51,9 +51,14 @@ export class WizardService {
       
       // Proceed with the setup routine now that we have the correct containerId and workspaceId
       await this.startBasicRoutine(container, AdvertiserID, prefix, workspaceId);
-      
+
+      // If everything was successful, return "success"
+      console.log("Setup completed successfully.");
+      return { status: "success" };
+
     } catch (error) {
       console.error("Error fetching containers or starting setup:", error);
+      return { status: "failed", message: error || "An error has occurred. Check Logs for detail" };
     }
   }
   

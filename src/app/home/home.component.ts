@@ -27,7 +27,9 @@ export class HomeComponent {
     { id: 2, label: 'Option 2: ActionField' },
     { id: 3, label: 'Option 3: Custom' }
   ];
-
+  requestStatus: string = 'stopped';
+  errorMessage: any;
+  
   constructor(private WizardService: WizardService, private authService: AuthenticationService) {}
   startLogin(): void {
     this.authService.signIn();
@@ -85,13 +87,19 @@ export class HomeComponent {
       return;
     }
     
-
     // Add logic to process the form data based on the selected installation option
     this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID);
-    
   }
 
-  private installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number): void {
-    this.WizardService.startSetup(ContainerID,SelectedOption,advertiserID)
+  private async installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number): Promise<void> {
+    this.requestStatus = "in-progress"
+    let setup = await this.WizardService.startSetup(ContainerID,SelectedOption,advertiserID)
+    if (setup.status=='success'){
+      this.requestStatus = "success"
+    }
+    else{
+      this.requestStatus = "error"
+      this.errorMessage = setup.message;
+    }
   }
 }

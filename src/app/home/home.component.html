@@ -51,9 +51,16 @@
     </div>
     <br>
     <div class="centered">
-      <button class="big-button" (click)="onSubmit()" [disabled]="!gtmContainer || !selectedOption">
+      <button class="big-button" (click)="onSubmit()" [disabled]="!gtmContainer || !selectedOption || requestStatus == 'in-progress'">
         Submit
       </button>
+      <br>
+      <div *ngIf="requestStatus === 'success'" class="alert alert-success" role="alert">
+        The setup has finished sucessfully!
+      </div>
+      <div *ngIf="requestStatus === 'error'" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
   </div>
 </div>
   
