@@ -1,0 +1,211 @@
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 40px;
+  background-color: #ffffff;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #757575;
+  text-align: center;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+  position: relative;
+  padding-left: 40px;
+}
+
+.google-btn:hover {
+  background-color: #f7f7f7;
+}
+
+.google-btn::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background-image: url('../assets/glogo.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+.label-container {
+  margin-bottom: 10px; /* Adds spacing between the label and options */
+}
+
+.options-container {
+  display: flex;
+  justify-content: center; /* Centers the options horizontally */
+  width: 100%; /* Ensures options are centered within the full width */
+}
+
+.gtmField {
+  max-width: 15%;
+  text-align: center;
+}
+
+/* Input Fields */
+.input-field {
+  @extend .form-control;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ddbfa2;
+  border-radius: 0.25rem;
+  color: #333;
+  background-color: #ddbfa2;
+
+  &:focus {
+    border-color: #8B1E1E; /* Custom focus color */
+    box-shadow: 0 0 0 0.2rem rgba(139, 30, 30, 0.25);
+  }
+}
+
+/* Tickboxes */
+.tickbox {
+  @extend .form-check-input;
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  
+  &:checked {
+    background-color: #8B1E1E; /* Custom color when checked */
+    border-color: #8B1E1E;
+  }
+}
+
+.tickbox-label {
+  @extend .form-check-label;
+  font-size: 1rem;
+  color: #333;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+/* Selection Boxes (Radio Buttons) */
+.selection-box {
+  @extend .form-check-input;
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+
+  &:checked {
+    background-color: #8B1E1E; /* Custom color when selected */
+    border-color: #8B1E1E;
+  }
+}
+
+.radio-color {
+accent-color: #ff6501;
+outline: none;
+box-shadow: none;
+}
+
+.radio-color:checked {
+accent-color: #bd4b01;
+outline: none;
+box-shadow: none;
+}
+
+.selection-box-label {
+  @extend .form-check-label;
+  font-size: 1rem;
+  color: #333;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+.spacing {
+padding-left: 1.5%;
+display: inline-flex;
+flex-direction: row;
+justify-content: center;
+min-width: 20vw;
+}
+.spacing-left {
+padding-left: 10px;
+}
+
+.leftpanel{
+  min-width: 13vw;
+}
+.rightpanel{
+  min-width: 150px;
+}
+.dev-tools{
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-line{
+  display: inline-flex;
+  flex-direction: row;
+}
+/* Big and Small Buttons */
+.big-button {
+    @extend .btn;
+    @extend .btn-lg;
+    @extend .btn-primary;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    background-color: #ff6500; /* Orange background color */
+    color: #fff; /* White text color */
+    border: none; /* Remove border if you want a clean orange button */
+
+    &:hover {
+        background-color: #bd4b01; /* Darker orange for hover effect */
+    }
+    &:disabled, 
+    &.disabled {
+      background-color: #db976a; /* Light orange for disabled state */
+      color: #ffffff; /* Keep text color white for readability */
+      cursor: not-allowed; /* Change cursor to indicate it's disabled */
+      opacity: 0.7; /* Optional: adjust opacity to make the button look inactive */
+  }
+}
+  
+.small-button {
+    @extend .btn;
+    @extend .btn-sm;
+    @extend .btn-secondary;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 0.3rem;
+    margin-bottom: 1%;
+    margin-top: 1%;
+    margin-left: 0.5%;
+    max-width: 130px;
+}
+
+.margin-bot{
+  margin-bottom: 50px
+}
+/* Header Text */
+.header-text {
+  @extend .display-4;
+  font-family: "Roboto";
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  background: -webkit-linear-gradient(left, #ffae00, #e62107);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Softer 3D layered text shadow effect */
+  text-shadow: 
+      1px 1px 2px rgba(0, 0, 0, 0.1),
+      2px 2px 4px rgba(0, 0, 0, 0.07),
+      3px 3px 6px rgba(0, 0, 0, 0.05),
+      4px 4px 8px rgba(0, 0, 0, 0.03),
+      5px 5px 10px rgba(0, 0, 0, 0.02);
+}
+
+

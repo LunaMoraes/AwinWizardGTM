@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment';
   selector: 'app-home',
   templateUrl: './home.component.html',
   standalone: true,
-  styleUrls: ['./home.component.scss', '../../styles.scss'],
+  styleUrls: ['../app.component.scss', './home.component.scss', '../../styles.scss'],
   imports: [FormsModule, CommonModule]
 })
 
