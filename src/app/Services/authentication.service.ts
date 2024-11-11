@@ -249,7 +249,6 @@ export class AuthenticationService {
             }
 
             const containersData = await containersResponse.json();
-            console.log("Container unfiltered data:",containersData)
             // Check if any container has the matching public ID if its not empty            
             if(containersData && containersData.container){
               const matchingContainer = containersData.container.find(
