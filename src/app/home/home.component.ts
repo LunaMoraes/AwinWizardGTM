@@ -139,6 +139,9 @@ export class HomeComponent {
     this.authService.signOut();
     this.authed = false;
   }
+  debug(){
+    
+  }
   // Handle form submission
   onSubmit(): void {
     if (!this.gtmContainer || !this.selectedOption || !this.advertiserID) {

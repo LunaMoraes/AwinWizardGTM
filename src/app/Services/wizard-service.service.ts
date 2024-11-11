@@ -25,11 +25,14 @@ export class WizardService {
   private customTriggerId: any = {};
   private isFetchComplete = false;
   private MasterTagPublicID: any = {};
-  private MasterTagTemplateID: any = 127;
+  private MasterTagTemplateID: any = {};
   private LastClickPublicID: any = {};
-  private LastClickTemplateID: any = 128;
+  private LastClickTemplateID: any = {};
   private ConversionTagPublicID: any = {};
-  private ConversionTemplateID: any = 126;
+  private ConversionTemplateID: any = {};
+  private MasterTagTemplateData: any = environment.MASTERTAG
+  private lastClickTemplateData: any = environment.LASTCLICK
+  private ConversionTemplateData: any = environment.CONVERSION
 
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
@@ -107,9 +110,49 @@ export class WizardService {
     const Cookie = this.savedVariables['AwinChannelCookie'];
 
     await this.waitTimeout() //Removing chance of getting denial
+    parameters = [
+      {
+        "galleryReference": {
+          "host": "github.com",
+          "owner": "EdinCuturic",
+          "repository": "awin-advertiser-mastertag-google-tag-manager",
+          "version": "a55a42b33783bbf2dbe7b019608845b5786119d0",
+          "signature": "2c981c400a0e56e33573bb8c2ae57a73aff90ec0511d6443bac7e85eb0a0c834"
+        } 
+      }
+    ];
+    this.MasterTagTemplateID = await this.importCommunityTemplate(this.containerId, workspaceId, "Awin - Mastertag", parameters, this.FolderID, this.MasterTagTemplateData);
+    
+    parameters = [
+      {
+        "galleryReference": {
+          "host": "github.com",
+          "owner": "Allan-Urique",
+          "repository": "GTM_CustomTag_AwinLastClickIdentifier",
+          "version": "81344ca07ca7d1aa3f8ae8cdf0e05eab8d10000f",
+          "signature": "6358e68e02efef27eed974d32135e5cf389893b7ad5a2e153f3de1b86cc84c17"
+        } 
+      }
+    ];
+    this.LastClickTemplateID = await this.importCommunityTemplate(this.containerId, workspaceId, "Awin - AW Last Click Identifier", parameters, this.FolderID, this.lastClickTemplateData);
+    
+    parameters = [
+      {
+        "galleryReference": {
+          "host": "github.com",
+          "owner": "EdinCuturic",
+          "repository": "awin-conversion-tag-google-tag-manager",
+          "version": "bb41feaa441206bfcb866430049501712d7e677a",
+          "signature": "14d834b02db24822aa85adc85398c3e7f159baa3a8b3167bcb337354f3b3bfd7"
+        } 
+      }
+    ];
+    this.ConversionTemplateID = await this.importCommunityTemplate(this.containerId, workspaceId, "Awin - Conversion Tag", parameters, this.FolderID, this.ConversionTemplateData);
+    
     this.MasterTagPublicID = 'cvt_'+this.containerId+"_"+this.MasterTagTemplateID
     this.LastClickPublicID = 'cvt_'+this.containerId+"_"+this.LastClickTemplateID
     this.ConversionTagPublicID = 'cvt_'+this.containerId+"_"+this.ConversionTemplateID
+    await this.waitTimeout() //Removing chance of getting denial
 
     parameters = [{ key: 'advertiserId', type: 'TEMPLATE', value: AdvertiserID }];
     await this.importCommunityTag(this.containerId, workspaceId, this.MasterTagPublicID, "Awin - Mastertag", this.AllPagesTrigger, parameters, this.FolderID);
@@ -340,26 +383,24 @@ export class WizardService {
     containerId: number,
     workspaceId: string,
     templateName: string,
-    templateId: string,
     parameters: any[],
-    folderId: string
+    folderId: string,
+    templateData: any,
   ): Promise<void> {
   const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
 
     const body = {
+      templateData: templateData,
+      type: "TAG",
       name: templateName,
-      templateId: templateId, // The provided template ID (if required by GTM)
-      parameter: parameters.map(param => ({
-        key: param.key,
-        type: 'template',
-        value: param.value
-      })),
-      parentFolderId: folderId
+      parentFolderId: folderId,
+      galleryReference: parameters[0].galleryReference
     };
 
     try {
       const response = await this.http.post<any>(url, body, { headers: this.headers }).toPromise();
       console.log(`${templateName} template created successfully:`, response);
+      return response.templateId;
     } catch (error) {
       console.error(`Error creating ${templateName} template:`, error);
       throw new Error("Template couldn't be imported.");
@@ -369,7 +410,7 @@ export class WizardService {
   //This function exists because otherwise we would get errors for utilising the API too quickly
   private waitTimeout() {
     return new Promise((resolve) => {
-      setTimeout(resolve, 15000); // 1 minute = 60000 milliseconds
+      setTimeout(resolve, 8000); // 1 minute = 60000 milliseconds
     });
   }
   

@@ -44,7 +44,6 @@ export class AuthenticationService {
       }
     });
   }
-
   async fetchContainers(): Promise<any> {
     const accessToken = sessionStorage.getItem('accessToken');
     if (!accessToken) {
