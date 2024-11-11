@@ -16,7 +16,7 @@ export class AuthenticationService {
   initGoogleOAuth(): void {
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: environment.GAPI_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/tagmanager.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+      scope: 'https://www.googleapis.com/auth/tagmanager.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/tagmanager.edit.containers',
       callback: (tokenResponse: any) => {
         console.log("Access token received:", tokenResponse.access_token);
         sessionStorage.setItem('accessToken', tokenResponse.access_token);
@@ -44,13 +44,13 @@ export class AuthenticationService {
       }
     });
   }
-  async fetchContainers(): Promise<any> {
+  async fetchContainers(accountID: any): Promise<any> {
     const accessToken = sessionStorage.getItem('accessToken');
     if (!accessToken) {
       throw new Error("User is not authenticated.");
     }
 
-    const accountId = environment.TEST_ACCOUNT_ID;
+    const accountId = accountID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers`;
 
     const response = await fetch(url, {

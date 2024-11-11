@@ -53,7 +53,8 @@ export class WizardService {
     
     // Fetch containers to get the numeric containerId
     try {
-      const containersData = await this.authService.fetchContainers();
+      const containersData = await this.authService.fetchContainers(this.accountId);
+      console.log(containersData)
       const targetContainer = containersData.container.find((cont: any) => cont.publicId === container); // Match with public ID if available
       if (targetContainer) {
         this.containerId = targetContainer.containerId;  // Save the numeric ID

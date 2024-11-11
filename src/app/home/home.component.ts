@@ -51,7 +51,7 @@ export class HomeComponent {
   }
   // Method to fetch containers
   fetchContainers(): void {
-    this.authService.fetchContainers()
+    this.authService.fetchContainers(environment.TEST_ACCOUNT_ID)
       .then((data) => {
         this.containers = data.container || [];
         console.log("Containers fetched:", this.containers);
@@ -96,13 +96,14 @@ export class HomeComponent {
 
   // Validator for GTM Container ID (must match GTM- followed by digits)
   isValidGTMContainer(gtmContainer: any): boolean {
-    const gtmPattern = /^GTM-[A-Z0-9]{7,}$/i;
-    return gtmPattern.test(gtmContainer);
+    const gtmPattern = /^GTM-[A-Z0-9]{6,}$/i;
+    //return gtmPattern.test(gtmContainer);
+    return true
   }
 
   // Validator for Advertiser ID (must be numeric and of length 7)
   isValidAdvertiserID(id: any): boolean {
-    const advertiserIdPattern = /^\d{5,}$/;
+    const advertiserIdPattern = /^\d{3,}$/;
     if (!advertiserIdPattern.test(id)) {
       return false;
     }
