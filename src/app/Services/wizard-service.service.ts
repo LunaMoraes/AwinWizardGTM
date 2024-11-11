@@ -34,12 +34,19 @@ export class WizardService {
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
   // Function to start the setup
-  async startSetup(container: IContainer[], optionId: number, AdvertiserID: number): Promise<{ status: string, message?: any }> {
+  async startSetup(container: IContainer[], optionId: number, AdvertiserID: number, accountIDValue?:number): Promise<{ status: string, message?: any }> {
     console.log('Starting setup | Option ID:', optionId, '| Advertiser ID:', AdvertiserID);
+    if(!accountIDValue){
+      console.log("Starting Setup without account ID provided")
+      await this.fetchAccountId(container);
+    } else{
+      console.log("Starting Setup with account ID: ", accountIDValue)
+      this.accountId = accountIDValue;
+    }
+    
     let prefix = this.getPrefix(optionId);
-
-    //Grab account ID for future requests
-    await this.fetchAccountId(container);
+    
+    
     
     // Fetch containers to get the numeric containerId
     try {
@@ -362,7 +369,7 @@ export class WizardService {
   //This function exists because otherwise we would get errors for utilising the API too quickly
   private waitTimeout() {
     return new Promise((resolve) => {
-      setTimeout(resolve, 30000); // 1 minute = 60000 milliseconds
+      setTimeout(resolve, 15000); // 1 minute = 60000 milliseconds
     });
   }
   

@@ -16,7 +16,7 @@ export class AuthenticationService {
   initGoogleOAuth(): void {
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: environment.GAPI_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+      scope: 'https://www.googleapis.com/auth/tagmanager.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
       callback: (tokenResponse: any) => {
         console.log("Access token received:", tokenResponse.access_token);
         sessionStorage.setItem('accessToken', tokenResponse.access_token);
@@ -239,26 +239,30 @@ export class AuthenticationService {
         const accountsData = await accountsResponse.json();
         
         for (const account of accountsData.account) {
+            await this.waitTimeout();
             const containersResponse = await fetch(`${apiUrl}/${account.accountId}/containers`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
-
             if (!containersResponse.ok) {
                 throw new Error(`Failed to fetch containers for account ${account.accountId}: ${containersResponse.statusText}`);
             }
 
             const containersData = await containersResponse.json();
-
-            // Check if any container has the matching public ID
-            const matchingContainer = containersData.container.find(
+            console.log("Container unfiltered data:",containersData)
+            // Check if any container has the matching public ID if its not empty            
+            if(containersData && containersData.container){
+              const matchingContainer = containersData.container.find(
                 (container: any) => container.publicId === containerPublicId
-            );
-
-            if (matchingContainer) {
+              );
+              if (matchingContainer) {
                 console.log(`Found container with public ID ${containerPublicId} in account ID ${account.accountId}`);
                 return account.accountId;
+              }
+            }
+            else{
+              console.log("No containers on account, consider removing it: ", account)
             }
         }
 
@@ -274,5 +278,10 @@ export class AuthenticationService {
     // Clear the token from session storage
     sessionStorage.removeItem('accessToken');
     // You may also want to call google.accounts.id.disableAutoSelect() if applicable
+  }
+  private async waitTimeout() {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 5000); // 1 minute = 60000 milliseconds
+    });
   }
 }

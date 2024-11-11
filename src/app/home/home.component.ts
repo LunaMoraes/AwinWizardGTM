@@ -33,6 +33,8 @@ export class HomeComponent {
   devToolsActive: boolean = false;
   warn: boolean = false;
   authed: boolean = false;
+  provideAccountID: boolean = true;
+  accountIDValue!: number;
   
   constructor(private WizardService: WizardService, private authService: AuthenticationService) {}
   startLogin(): void {
@@ -143,14 +145,19 @@ export class HomeComponent {
       alert('Please enter a GTM Container ID and select an installation option.');
       return;
     }
-    
+
     // Add logic to process the form data based on the selected installation option
-    this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID);
+    if(this.provideAccountID==true){
+      this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID, this.accountIDValue);
+    }
+    else{
+      this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID);
+    }
   }
 
-  private async installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number): Promise<void> {
+  private async installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number, accountIDValue?: number): Promise<void> {
     this.requestStatus = "in-progress"
-    let setup = await this.WizardService.startSetup(ContainerID,SelectedOption,advertiserID)
+    let setup = await this.WizardService.startSetup(ContainerID,SelectedOption,advertiserID,accountIDValue)
     if (setup.status=='success'){
       this.requestStatus = "success"
     }
