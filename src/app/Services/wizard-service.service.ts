@@ -15,6 +15,7 @@ export class WizardService {
     Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
     'Content-Type': 'application/json'
   });
+  
   private containerId: number = 0;
   private readonly mastertagID = "1";
   private readonly converionTagID = "1";
@@ -100,8 +101,63 @@ export class WizardService {
     });
 
     await this.createFolder(workspaceId);
-    
-    await this.createVariables(this.containerId, workspaceId, this.FolderID, prefix);
+
+    parameters = [
+        {
+            name: 'AwinChannelCookie',
+            type: 'k',  // GTM type for the cookie variable
+            parameters: [
+                { key: 'decodeCookie', type: 'boolean', value: 'false' },
+                { key: 'name', type: 'template', value: 'AwinChannelCookie' }  // Replace with your actual cookie name
+            ]
+        },
+        {
+            name: 'Awin - Total Value',
+            type: 'v',  // GTM type for the DataLayer variable
+            parameters: [
+                { key: 'dataLayerVersion', type: 'integer', value: '2' },
+                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
+                { key: 'name', type: 'template', value: prefix + 'value' }
+            ]
+        },
+        {
+            name: 'Awin - Order ID',
+            type: 'v',
+            parameters: [
+                { key: 'dataLayerVersion', type: 'integer', value: '2' },
+                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
+                { key: 'name', type: 'template', value: prefix + 'transaction_id' }
+            ]
+        },
+        {
+            name: 'Awin - Voucher',
+            type: 'v',
+            parameters: [
+                { key: 'dataLayerVersion', type: 'integer', value: '2' },
+                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
+                { key: 'name', type: 'template', value: prefix + 'coupon' }
+            ]
+        },
+        {
+            name: 'Awin - PLT',
+            type: 'v',
+            parameters: [
+                { key: 'dataLayerVersion', type: 'integer', value: '2' },
+                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
+                { key: 'name', type: 'template', value: prefix + 'items' }
+            ]
+        },
+        {
+          name: 'Awin - Currency',
+          type: 'v',
+          parameters: [
+              { key: 'dataLayerVersion', type: 'integer', value: '2' },
+              { key: 'setDefaultValue', type: 'boolean', value: 'false' },
+              { key: 'name', type: 'template', value: prefix + 'currency' }
+          ]
+      }
+    ];
+    await this.createVariables(this.containerId, workspaceId, this.FolderID, prefix, parameters);
     await this.createTrigger(this.containerId, workspaceId, this.FolderID);
 
     const Amount = this.savedVariables['Awin - Total Value'];
@@ -186,7 +242,7 @@ export class WizardService {
       { key: 'voucher', type: 'template', value: '{{Awin - Voucher}}' },
       { key: 'channel', type: 'template', value: '{{AwinChannelCookie}}' },
       { key: 'plt', type: 'template', value: '{{Awin - PLT}}' },
-      { key: 'currency', type: 'template', value: 'BRL' },
+      { key: 'currency', type: 'template', value: '{{Awin - Currency}}' },
       { key: 'advertiserId', type: 'template', value: AdvertiserID }
     ];
 
@@ -198,7 +254,7 @@ export class WizardService {
       this.customTriggerId, // Use the custom trigger created earlier
       parameters,
       this.FolderID
-  );
+    );
   }
 
   // Folder creation
@@ -231,54 +287,9 @@ export class WizardService {
   }
   
   // Variable creation
-  private async createVariables(containerId: number, workspaceId: string, folderId: string, prefix: string): Promise<void> {
+  private async createVariables(containerId: number, workspaceId: string, folderId: string, prefix: string, variables: any) : Promise<void> {
     const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/variables`;
-    const variables = [
-        {
-            name: 'AwinChannelCookie',
-            type: 'k',  // GTM type for the cookie variable
-            parameters: [
-                { key: 'decodeCookie', type: 'boolean', value: 'false' },
-                { key: 'name', type: 'template', value: 'AwinChannelCookie' }  // Replace with your actual cookie name
-            ]
-        },
-        {
-            name: 'Awin - Total Value',
-            type: 'v',  // GTM type for the DataLayer variable
-            parameters: [
-                { key: 'dataLayerVersion', type: 'integer', value: '2' },
-                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
-                { key: 'name', type: 'template', value: prefix + 'value' }
-            ]
-        },
-        {
-            name: 'Awin - Order ID',
-            type: 'v',
-            parameters: [
-                { key: 'dataLayerVersion', type: 'integer', value: '2' },
-                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
-                { key: 'name', type: 'template', value: prefix + 'transaction_id' }
-            ]
-        },
-        {
-            name: 'Awin - Voucher',
-            type: 'v',
-            parameters: [
-                { key: 'dataLayerVersion', type: 'integer', value: '2' },
-                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
-                { key: 'name', type: 'template', value: prefix + 'coupon' }
-            ]
-        },
-        {
-            name: 'Awin - PLT',
-            type: 'v',
-            parameters: [
-                { key: 'dataLayerVersion', type: 'integer', value: '2' },
-                { key: 'setDefaultValue', type: 'boolean', value: 'false' },
-                { key: 'name', type: 'template', value: prefix + 'items' }
-            ]
-        }
-    ];
+    
 
     const createdVariableIds: { [key: string]: string } = {};
 
@@ -380,15 +391,16 @@ export class WizardService {
         throw new Error("Tags couldn't be imported.");
     }
   }
+  
   private async importCommunityTemplate(
-    containerId: number,
-    workspaceId: string,
-    templateName: string,
-    parameters: any[],
-    folderId: string,
-    templateData: any,
-  ): Promise<void> {
-  const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
+      containerId: number,
+      workspaceId: string,
+      templateName: string,
+      parameters: any[],
+      folderId: string,
+      templateData: any,
+    ): Promise<void> {
+    const url = `${this.apiUrl}/accounts/${this.accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
 
     const body = {
       templateData: templateData,
