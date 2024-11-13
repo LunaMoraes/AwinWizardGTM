@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IContainer } from '../models/wizard-interfaces';
+import { IContainer, ITemplate } from '../models/wizard-interfaces';
 import { environment } from '../../environments/environment';
 import { AuthenticationService } from '../Services/authentication.service';
 import { GAPIService } from '../Services/gapi.service';
@@ -15,9 +15,7 @@ export class WizardService {
   private FolderID: any = {};
   private accountId: any = undefined;
   private customTriggerId: any = {};
-  private MasterTagTemplateID: any = {};
-  private LastClickTemplateID: any = {};
-  private ConversionTemplateID: any = {};
+  private TemplateIDs: ITemplate = {};
 
   constructor(
     private authService: AuthenticationService,
@@ -34,7 +32,8 @@ export class WizardService {
     }
   }
   
-  private waitTimeout() { //This function exists because otherwise we would get errors for utilising the API too quickly
+  private waitTimeout() { 
+    //This function exists because otherwise we would get errors for utilising the API too quickly
     return new Promise((resolve) => {
       setTimeout(resolve, 20000); // 1 minute = 60000 milliseconds
     });
@@ -71,7 +70,7 @@ export class WizardService {
       const workspaceId = await this.authService.fetchDefaultWorkspace(this.accountId, this.containerId);
       
       // Proceed with the setup routine now that we have the necessary parameters
-      await this.startBasicRoutine(container, AdvertiserID, prefix, workspaceId);
+      await this.startBasicRoutine(AdvertiserID, prefix, workspaceId);
 
 
       console.log("Setup completed successfully.");
@@ -85,7 +84,7 @@ export class WizardService {
 
 
   // Basic setup routine
-  private async startBasicRoutine(container: IContainer[], AdvertiserID: any, prefix: string, workspaceId: string) {
+  private async startBasicRoutine(AdvertiserID: any, prefix: string, workspaceId: string) {
     let parameters:any = [];
 
     //ensuring that the headers are not null
@@ -156,16 +155,16 @@ export class WizardService {
 
     await this.waitTimeout() //Removing chance of getting denial
 
-    this.MasterTagTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - Mastertag", [parameterData.MASTERTAG_TEMPLATE], this.FolderID, templateData.MASTERTAG, this.accountId);
-    this.LastClickTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - AW Last Click Identifier", [parameterData.LASTCLICK_TEMPLATE], this.FolderID, templateData.LASTCLICK, this.accountId);
-    this.ConversionTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - Conversion Tag", [parameterData.CONVERSION_TEMPLATE], this.FolderID, templateData.CONVERSION, this.accountId);
+    this.TemplateIDs.MasterTagTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - Mastertag", [parameterData.MASTERTAG_TEMPLATE], this.FolderID, templateData.MASTERTAG, this.accountId);
+    this.TemplateIDs.LastClickTemplateID= await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - AW Last Click Identifier", [parameterData.LASTCLICK_TEMPLATE], this.FolderID, templateData.LASTCLICK, this.accountId);
+    this.TemplateIDs.ConversionTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - Conversion Tag", [parameterData.CONVERSION_TEMPLATE], this.FolderID, templateData.CONVERSION, this.accountId);
     
     await this.waitTimeout() //Removing chance of getting denial
 
     parameters = [{ key: 'advertiserId', type: 'TEMPLATE', value: AdvertiserID }];
     await this.gapiService.importCommunityTag(
       this.containerId, workspaceId, 
-      'cvt_'+this.containerId+"_"+this.MasterTagTemplateID, 
+      'cvt_'+this.containerId+"_"+this.TemplateIDs.MasterTagTemplateID, 
       "Awin - Mastertag", 
       environment.ALL_PAGES_TRIGGER, 
       parameters, 
@@ -176,7 +175,7 @@ export class WizardService {
     await this.gapiService.importCommunityTag(
       this.containerId,
       workspaceId,
-      'cvt_'+this.containerId+"_"+this.LastClickTemplateID,
+      'cvt_'+this.containerId+"_"+this.TemplateIDs.LastClickTemplateID,
       "Awin - AW Last Click Identifier",
       environment.ALL_PAGES_TRIGGER,
       [...parameterData.LASTCLICK_TAG],
@@ -200,7 +199,7 @@ export class WizardService {
     await this.gapiService.importCommunityTag(
       this.containerId,
       workspaceId,
-      'cvt_'+this.containerId+"_"+this.ConversionTemplateID, 
+      'cvt_'+this.containerId+"_"+this.TemplateIDs.ConversionTemplateID, 
       "Awin - Conversion Tag",
       this.customTriggerId,
       parameters,
