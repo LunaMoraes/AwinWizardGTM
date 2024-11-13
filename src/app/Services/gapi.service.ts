@@ -12,8 +12,8 @@ export class GAPIService {
   constructor(private http: HttpClient, private authService: AuthenticationService) { }
 
     // Folder creation
-    async createFolder(workspaceId: string, accountId: number, containerId: number): Promise<void> {
-      const url = `${this.apiUrl}/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/folders`;
+    async createFolder(fullURL: any): Promise<void> {
+      const url = `${this.apiUrl}/${fullURL}/folders`;
       const body = { name: 'Awin' };
       try {
           const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
@@ -39,14 +39,11 @@ export class GAPIService {
     
     // Variable creation
     async createVariables(
-        containerId: number, 
-        workspaceId: string, 
+        fullURL: any, 
         folderId: string, 
-        prefix: string, 
         variables: any,
-        accountId: number
       ) : Promise<void> {
-      const url = `${this.apiUrl}/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/variables`;
+      const url = `${this.apiUrl}/${fullURL}/variables`;
       
       for (const variable of variables) {
           const body = {
@@ -68,12 +65,10 @@ export class GAPIService {
   
     // Trigger creation
     async createTrigger(
-        containerId: number, 
-        workspaceId: string, 
+        fullURL: any, 
         folderId: string,
-        accountId: number
       ): Promise<string | null> {
-      const url = `${this.apiUrl}/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/triggers`;
+      const url = `${this.apiUrl}/${fullURL}/triggers`;
       const body = {
           name: 'Awin - Custom Trigger',
           type: 'customEvent',
@@ -112,16 +107,14 @@ export class GAPIService {
   
     // Tag import
     async importCommunityTag(
-        containerId: number,
-        workspaceId: string,
+        fullURL: any,
         tagTemplateId: string,
         tagName: string,
         triggerId: string,
         parameters: any[],
         folderId: string,
-        accountId: number
       ): Promise<void> {
-      const url = `${this.apiUrl}/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/tags`;
+      const url = `${this.apiUrl}/${fullURL}/tags`;
       
       const body = {
         name: tagName,
@@ -150,15 +143,13 @@ export class GAPIService {
     
     // Template import
     async importCommunityTemplate(
-        containerId: number,
-        workspaceId: string,
+        fullURL: any,
         templateName: string,
         parameters: any[],
         folderId: string,
         templateData: any,
-        accountId: number
       ): Promise<void> {
-      const url = `${this.apiUrl}/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
+      const url = `${this.apiUrl}/${fullURL}/templates`;
   
       const body = {
         templateData: templateData,

@@ -86,14 +86,15 @@ export class WizardService {
   // Basic setup routine
   private async startBasicRoutine(AdvertiserID: any, prefix: string, workspaceId: string) {
     let parameters:any = [];
-
+    let fullURL = `accounts/${this.accountId}/containers/${this.containerId}/workspaces/${workspaceId}`
+    
     //ensuring that the headers are not null
     if(this.authService.headers == null){
       console.log("Headers are null, updating")
       this.authService.updateHeaders();
     }
 
-    this.FolderID = await this.gapiService.createFolder(workspaceId, this.accountId, this.containerId);
+    this.FolderID = await this.gapiService.createFolder(fullURL);
 
     parameters = [
         {
@@ -101,7 +102,7 @@ export class WizardService {
             type: 'k',  // GTM type for the cookie variable
             parameters: [
                 { key: 'decodeCookie', type: 'boolean', value: 'false' },
-                { key: 'name', type: 'template', value: 'AwinChannelCookie' }  // Replace with your actual cookie name
+                { key: 'name', type: 'template', value: 'AwinChannelCookie' } 
             ]
         },
         {
@@ -150,61 +151,49 @@ export class WizardService {
           ]
       }
     ];
-    await this.gapiService.createVariables(this.containerId, workspaceId, this.FolderID, prefix, parameters, this.accountId);
-    this.customTriggerId = await this.gapiService.createTrigger(this.containerId, workspaceId, this.FolderID, this.accountId);
+    await this.gapiService.createVariables(fullURL, this.FolderID, parameters);
+    this.customTriggerId = await this.gapiService.createTrigger(fullURL, this.FolderID);
 
     await this.waitTimeout() //Removing chance of getting denial
 
-    this.TemplateIDs.MasterTagTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - Mastertag", [parameterData.MASTERTAG_TEMPLATE], this.FolderID, templateData.MASTERTAG, this.accountId);
-    this.TemplateIDs.LastClickTemplateID= await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - AW Last Click Identifier", [parameterData.LASTCLICK_TEMPLATE], this.FolderID, templateData.LASTCLICK, this.accountId);
-    this.TemplateIDs.ConversionTemplateID = await this.gapiService.importCommunityTemplate(this.containerId, workspaceId, "Awin - Conversion Tag", [parameterData.CONVERSION_TEMPLATE], this.FolderID, templateData.CONVERSION, this.accountId);
+    this.TemplateIDs.MasterTagTemplateID = await this.gapiService.importCommunityTemplate(fullURL, "Awin - Mastertag", [parameterData.MASTERTAG_TEMPLATE], this.FolderID, templateData.MASTERTAG);
+    this.TemplateIDs.LastClickTemplateID= await this.gapiService.importCommunityTemplate(fullURL, "Awin - AW Last Click Identifier", [parameterData.LASTCLICK_TEMPLATE], this.FolderID, templateData.LASTCLICK);
+    this.TemplateIDs.ConversionTemplateID = await this.gapiService.importCommunityTemplate(fullURL, "Awin - Conversion Tag", [parameterData.CONVERSION_TEMPLATE], this.FolderID, templateData.CONVERSION);
     
     await this.waitTimeout() //Removing chance of getting denial
 
     parameters = [{ key: 'advertiserId', type: 'TEMPLATE', value: AdvertiserID }];
     await this.gapiService.importCommunityTag(
-      this.containerId, workspaceId, 
+      fullURL,
       'cvt_'+this.containerId+"_"+this.TemplateIDs.MasterTagTemplateID, 
       "Awin - Mastertag", 
       environment.ALL_PAGES_TRIGGER, 
       parameters, 
       this.FolderID,
-      this.accountId
     );
     
     await this.gapiService.importCommunityTag(
-      this.containerId,
-      workspaceId,
+      fullURL,
       'cvt_'+this.containerId+"_"+this.TemplateIDs.LastClickTemplateID,
       "Awin - AW Last Click Identifier",
       environment.ALL_PAGES_TRIGGER,
       [...parameterData.LASTCLICK_TAG],
-      this.FolderID,
-      this.accountId
+      this.FolderID
     );
     
+    parameters = parameterData.CONVERSION_TAG;
     parameters = [
-      { key: 'amount', type: 'template', value: '{{Awin - Total Value}}' },
-      { key: 'cg', type: 'template', value: 'DEFAULT' },
-      { key: 'test', type: 'template', value: '0' },
-      { key: 'orderRef', type: 'template', value: '{{Awin - Order ID}}' },
-      { key: 'overrideDatafields', type: 'boolean', value: 'false' },
-      { key: 'voucher', type: 'template', value: '{{Awin - Voucher}}' },
-      { key: 'channel', type: 'template', value: '{{AwinChannelCookie}}' },
-      { key: 'plt', type: 'template', value: '{{Awin - PLT}}' },
-      { key: 'currency', type: 'template', value: '{{Awin - Currency}}' },
+      ...parameters,
       { key: 'advertiserId', type: 'template', value: AdvertiserID }
-    ];
-
+    ]
+    
     await this.gapiService.importCommunityTag(
-      this.containerId,
-      workspaceId,
+      fullURL,
       'cvt_'+this.containerId+"_"+this.TemplateIDs.ConversionTemplateID, 
       "Awin - Conversion Tag",
       this.customTriggerId,
       parameters,
-      this.FolderID,
-      this.accountId
+      this.FolderID
     );
   }
 

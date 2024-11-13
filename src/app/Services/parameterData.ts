@@ -31,5 +31,16 @@ export const parameterData = {
   { key: 'overwriteCookieDomain', type: 'boolean', value: 'false' },
   { key: 'cookiePeriod', type: 'template', value: '30' },
   { key: 'cookieName', type: 'template', value: 'AwinChannelCookie' },
-  { key: 'organicFilter', type: 'boolean', value: 'false' }],
+  { key: 'organicFilter', type: 'boolean', value: 'false' }
+  ],
+  CONVERSION_TAG: [{ key: 'amount', type: 'template', value: '{{Awin - Total Value}}' },
+    { key: 'cg', type: 'template', value: 'DEFAULT' },
+    { key: 'test', type: 'template', value: '0' },
+    { key: 'orderRef', type: 'template', value: '{{Awin - Order ID}}' },
+    { key: 'overrideDatafields', type: 'boolean', value: 'false' },
+    { key: 'voucher', type: 'template', value: '{{Awin - Voucher}}' },
+    { key: 'channel', type: 'template', value: '{{AwinChannelCookie}}' },
+    { key: 'plt', type: 'template', value: '{{Awin - PLT}}' },
+    { key: 'currency', type: 'template', value: '{{Awin - Currency}}' }
+  ]
 } as const;
