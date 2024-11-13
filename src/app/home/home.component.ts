@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { IContainer } from '../models/wizard-interfaces';
 import { WizardService } from '../Services/wizard-service.service';
+import { DevService } from '../Services/dev.service';
 import { AuthenticationService } from '../Services/authentication.service';
 import { environment } from '../../environments/environment';
 
@@ -20,13 +21,6 @@ export class HomeComponent {
   selectedOption!: number;
   advertiserID!: number;
   containers: any[] = [];
-
-  // Define the available installation options
-  installationOptions = [
-    { id: 1, label: 'Option 1: Ecommerce' },
-    { id: 2, label: 'Option 2: ActionField' },
-    { id: 3, label: 'Option 3: Custom' }
-  ];
   requestStatus: string = 'stopped';
   errorMessage: any;
   warnMessage: any;
@@ -34,74 +28,32 @@ export class HomeComponent {
   warn: boolean = false;
   authed: boolean = false;
   provideAccountID: boolean = true;
-  accountIDValue!: number;
+  accountIDValue: number = 0;
+    // Define the available installation options
+    installationOptions = [
+      { id: 1, label: 'Option 1: Ecommerce' },
+      { id: 2, label: 'Option 2: ActionField' },
+      { id: 3, label: 'Option 3: Custom' }
+    ];
   
-  constructor(private WizardService: WizardService, private authService: AuthenticationService) {}
+  constructor(public devService: DevService, private WizardService: WizardService, private authService: AuthenticationService) {}
+  
+  // Basic Functions
   startLogin(): void {
     this.authService.signIn();
     this.authed = true;
   }
-
-  toggleDevTools(){
-    if(this.devToolsActive == true){
-      this.devToolsActive = false;
-    }else{
-      this.devToolsActive = true;
-    }
-  }
-  // Method to fetch containers
-  fetchContainers(): void {
-    this.authService.fetchContainers(environment.TEST_ACCOUNT_ID)
-      .then((data) => {
-        this.containers = data.container || [];
-        console.log("Containers fetched:", this.containers);
-      })
-      .catch(error => {
-        console.error("Error fetching containers:", error);
-      });
-  }
-  fetchVariables(): void {
-    this.authService.fetchVariables(environment.TEST_CONTAINER_ID, '2');
-  }
-  fetchTriggers(): void {
-    this.authService.fetchTriggers(environment.TEST_CONTAINER_ID, '2').then(triggers => {
-      console.log("Triggers fetched successfully:", triggers);
-    }).catch(error => {
-      console.error("Error fetching triggers:", error);
-    });
-  }
-  fetchTags(): void {
-    this.authService.fetchTags(environment.TEST_CONTAINER_ID, '2').then(tags => {
-      console.log("Tags fetched successfully:", tags);
-    }).catch(error => {
-      console.error("Error fetching tags:", error);
-    });
-  }
-  fetchTemplates(): void {
-    this.authService.fetchTemplates(environment.TEST_CONTAINER_ID, '2').then(templates => {
-        console.log("Templates fetched successfully:", templates);
-    }).catch(error => {
-        console.error("Error fetching templates:", error);
-    });
-  }
-  fetchAccountId(): void {
-    this.authService.fetchAccountIdByContainerPublicId('GTM-MPZ95TMZ')
-      .then(accountId => {
-        console.log("Account ID fetched successfully:", accountId);
-      })
-      .catch(error => {
-        console.error("Error fetching account ID:", error);
-      });
+  signOut(){
+    this.authService.signOut();
+    this.authed = false;
   }
 
-  // Validator for GTM Container ID (must match GTM- followed by digits)
+  // Validators
   isValidGTMContainer(gtmContainer: any): boolean {
     const gtmPattern = /^GTM-[A-Z0-9]{6,}$/i;
     //return gtmPattern.test(gtmContainer);
     return true
   }
-
-  // Validator for Advertiser ID (must be numeric and of length 7)
   isValidAdvertiserID(id: any): boolean {
     const advertiserIdPattern = /^\d{3,}$/;
     if (!advertiserIdPattern.test(id)) {
@@ -112,8 +64,6 @@ export class HomeComponent {
     const idNumber = parseInt(id, 10);
     return idNumber % 2 === 0;
   }
-
-  // Function to check all validations before submission
   validateInputs(): boolean {
     if (!this.isValidGTMContainer(this.gtmContainer)) {
       this.warnMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
@@ -129,37 +79,14 @@ export class HomeComponent {
     return true;
   }
 
-  testValidation(){
-    this.validateInputs();
-  }
-  logErrors(){
-    console.log(this.warnMessage)
-    console.log(this.errorMessage)
-  }
-  signOut(){
-    this.authService.signOut();
-    this.authed = false;
-  }
-  debug(){
-    
-  }
-  // Handle form submission
+
+
+  // Handle form submission and setup start
   onSubmit(): void {
-    if (!this.gtmContainer || !this.selectedOption || !this.advertiserID) {
-      alert('Please enter a GTM Container ID and select an installation option.');
-      return;
-    }
-
-    // Add logic to process the form data based on the selected installation option
-    if(this.provideAccountID==true){
-      this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID, this.accountIDValue);
-    }
-    else{
-      this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID);
-    }
+    this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID, this.accountIDValue);
   }
 
-  private async installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number, accountIDValue?: number): Promise<void> {
+  private async installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number, accountIDValue: number): Promise<void> {
     this.requestStatus = "in-progress"
     let setup = await this.WizardService.startSetup(ContainerID,SelectedOption,advertiserID,accountIDValue)
     if (setup.status=='success'){
@@ -170,4 +97,35 @@ export class HomeComponent {
       this.errorMessage = setup.message;
     }
   }
+
+
+
+
+  //Dev Tools Buttons
+  toggleDevTools(){
+    if(this.devToolsActive == true){
+      this.devToolsActive = false;
+    }else{
+      this.devToolsActive = true;
+    }
+  }
+  fetchContainers(): void {
+    this.authService.fetchContainers(environment.TEST_ACCOUNT_ID)
+      .then((data) => {
+        this.containers = data.container || [];
+        console.log("Containers fetched:", this.containers);
+      });
+  }
+  fetchAccountId(): void {
+    this.authService.fetchAccountIdByContainerPublicId('GTM-MPZ95TMZ');
+  }
+  testValidation(){
+    this.validateInputs();
+  }
+  logErrors(){
+    console.log(this.warnMessage)
+    console.log(this.errorMessage)
+  }
+  debug(){}
+
 }

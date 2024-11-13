@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { HttpHeaders } from '@angular/common/http';
 
 declare const google: any;
 
@@ -9,30 +10,48 @@ declare const google: any;
 export class AuthenticationService {
 
   private tokenClient: any;
+  public headers:any = {}
 
   constructor() { }
 
-  // Initialize Google Identity Services OAuth
+  // Basic functions 
+  private async waitTimeout() {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 5000); // 1 minute = 60000 milliseconds
+    });
+  }
+
   initGoogleOAuth(): void {
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: environment.GAPI_CLIENT_ID,
       scope: 'https://www.googleapis.com/auth/tagmanager.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/tagmanager.edit.containers',
-      callback: (tokenResponse: any) => {
+      callback: async (tokenResponse: any) => {
         console.log("Access token received:", tokenResponse.access_token);
         sessionStorage.setItem('accessToken', tokenResponse.access_token);
+        try {
+          await this.updateHeaders();
+        } catch (error) {
+          console.log("Tivemos um erro: ", error)
+        }
       }
     });
   }
 
-  // Sign-in method
-  signIn(): void {
-    if (!this.tokenClient) {
-      this.initGoogleOAuth();
+  updateHeaders() {
+    const accessToken = sessionStorage.getItem('accessToken');
+    if (!accessToken) {
+      console.error('Access token not found in sessionStorage');
+      return;
     }
-    // Prompt the user to select a Google account and grant permissions
-    this.tokenClient.requestAccessToken();
+  
+    // Use a plain object instead of HttpHeaders
+    this.headers = {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    };
   }
-  // Callback handling method for OAuthComponent
+
+  //   OAuthComponent handling
   async handleOAuthCallback(): Promise<void> {
     return new Promise((resolve, reject) => {
       const accessToken = sessionStorage.getItem('accessToken');
@@ -44,20 +63,25 @@ export class AuthenticationService {
       }
     });
   }
-  async fetchContainers(accountID: any): Promise<any> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error("User is not authenticated.");
+
+  async signIn(): Promise<void> {
+    if (!this.tokenClient) {
+      this.initGoogleOAuth();
     }
+    this.tokenClient.requestAccessToken();
+  }
+  signOut(): void {
+    sessionStorage.removeItem('accessToken');
+  }
+
+
+  // Wizard functions
+  async fetchContainers(accountID: any): Promise<any> {
 
     const accountId = accountID;
     const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers`;
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
+    const response = await fetch(url, {headers: this.headers});
 
     if (!response.ok) {
       throw new Error(`Failed to fetch containers: ${response.statusText}`);
@@ -65,103 +89,12 @@ export class AuthenticationService {
 
     return response.json();
   }
-  
-  async fetchVariables(containerId: string, workspaceId: string): Promise<any> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error("User is not authenticated.");
-    }
 
-    const accountId = environment.TEST_ACCOUNT_ID;
-    const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/variables`;
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch variables: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log("Fetched variables:", data);
-    data.variable.forEach((variable: any) => {
-      console.log(`Variable Name: ${variable.name}, Type: ${variable.type}, Parameters:`, variable.parameter);
-    });
-
-    return data;
-  }
-
-
-  async fetchTags(containerId: string, workspaceId: string): Promise<any> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error("User is not authenticated.");
-    }
-
-    const accountId = environment.TEST_ACCOUNT_ID;
-    const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/tags`;
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch tags: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log("Fetched tags:", data);
-    data.tag.forEach((tag: any) => {
-      console.log(`Tag Name: ${tag.name}, Type: ${tag.type}, Template ID: ${tag.tagTemplateId}, Parameters:`, tag.parameter);
-    });
-
-    return data;
-  }
-
-  
-  async fetchTriggers(containerId: string, workspaceId: string): Promise<any> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error("User is not authenticated.");
-    }
-
-    const accountId = environment.TEST_ACCOUNT_ID;
-    const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/triggers`;
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch triggers: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log("Fetched triggers:", data);
-    data.trigger.forEach((trigger: any) => {
-      console.log(`Trigger Name: ${trigger.name}, Type: ${trigger.type}, Parameters:`, trigger.parameter);
-    });
-
-    return data;
-  }
-
-  async fetchDefaultWorkspace(apiUrl: string, accountId: string, containerId: number): Promise<string> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    const url = `${apiUrl}/accounts/${accountId}/containers/${containerId}/workspaces`;
+  async fetchDefaultWorkspace(accountId: string, containerId: number): Promise<string> {
+    const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces`;
 
     try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+        const response = await fetch(url, {headers: this.headers});
 
         if (!response.ok) {
             throw new Error(`Failed to fetch workspaces: ${response.statusText}`);
@@ -182,54 +115,11 @@ export class AuthenticationService {
     }
   }
   
-  async fetchTemplates(containerId: string, workspaceId: string): Promise<any> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-        throw new Error("User is not authenticated.");
-    }
-
-    const accountId = environment.TEST_ACCOUNT_ID;
-    const url = `https://tagmanager.googleapis.com/tagmanager/v2/accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}/templates`;
-
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch templates: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log("Fetched templates:", data);
-        data.template.forEach((template: any) => {
-            console.log(`Template Name: ${template.name}, Template ID: ${template.templateId}, Parameters:`, template.parameter);
-        });
-
-        return data;
-    } catch (error) {
-        console.error("Error fetching templates:", error);
-        throw error;
-    }
-  }
-
-
   async fetchAccountIdByContainerPublicId(containerPublicId: any): Promise<string | null> {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (!accessToken) {
-        throw new Error("User is not authenticated.");
-    }
-
     const apiUrl = 'https://tagmanager.googleapis.com/tagmanager/v2/accounts';
 
     try {
-        const accountsResponse = await fetch(apiUrl, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+        const accountsResponse = await fetch(apiUrl, { headers: this.headers });
 
         if (!accountsResponse.ok) {
             throw new Error(`Failed to fetch accounts: ${accountsResponse.statusText}`);
@@ -238,12 +128,9 @@ export class AuthenticationService {
         const accountsData = await accountsResponse.json();
         
         for (const account of accountsData.account) {
+            console.log("Fetching containers for account ID:", account.accountId);
             await this.waitTimeout();
-            const containersResponse = await fetch(`${apiUrl}/${account.accountId}/containers`, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
+            const containersResponse = await fetch(`${apiUrl}/${account.accountId}/containers`, {headers: this.headers});
             if (!containersResponse.ok) {
                 throw new Error(`Failed to fetch containers for account ${account.accountId}: ${containersResponse.statusText}`);
             }
@@ -270,16 +157,5 @@ export class AuthenticationService {
         console.error("Error fetching account ID by container public ID:", error);
         throw error;
     }
-  }
-  // Sign-out method
-  signOut(): void {
-    // Clear the token from session storage
-    sessionStorage.removeItem('accessToken');
-    // You may also want to call google.accounts.id.disableAutoSelect() if applicable
-  }
-  private async waitTimeout() {
-    return new Promise((resolve) => {
-      setTimeout(resolve, 5000); // 1 minute = 60000 milliseconds
-    });
   }
 }

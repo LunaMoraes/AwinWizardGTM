@@ -3,10 +3,10 @@
     <button class="small-button" (click)="toggleDevTools()">Toggle Dev Tools</button>
       <div *ngIf="devToolsActive === true" class="dev-tools">
         <button class="small-button"  (click)="fetchContainers()">Fetch Containers</button>
-        <button class="small-button"  (click)="fetchVariables()">Fetch All Variables</button>
-        <button class="small-button"  (click)="fetchTriggers()">Fetch All Triggers</button>
-        <button class="small-button"  (click)="fetchTags()">Fetch All Tags</button>
-        <button class="small-button"  (click)="fetchTemplates()">Fetch Templates</button>
+        <button class="small-button"  (click)="this.devService.fetchVariables()">Fetch All Variables</button>
+        <button class="small-button"  (click)="this.devService.fetchTriggers()">Fetch All Triggers</button>
+        <button class="small-button"  (click)="this.devService.fetchTags()">Fetch All Tags</button>
+        <button class="small-button"  (click)="this.devService.fetchTemplates()">Fetch Templates</button>
         <button class="small-button"  (click)="fetchAccountId()">Test Fetch Account ID</button>
         <button class="small-button"  (click)="testValidation()">Test Validation</button>
         <button class="small-button"  (click)="logErrors()">Log errors</button>
