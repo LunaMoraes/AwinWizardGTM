@@ -19,9 +19,13 @@ export class GAPIService {
           const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
           console.log('Folder created:', response);
           return response.folderId;
-      } catch (error) {
+      } catch (error:any) {
           console.error('Error creating folder:', error);
-          throw new Error("Folder Couldn't be Created.");
+          if(error.error.error.message=="Found entity with duplicate name."){
+            throw new Error("Folder already exists, aborting creation.")
+          } else {
+            throw new Error("Folder Couldn't be Created.");
+          }
       }
     }
   
@@ -99,9 +103,13 @@ export class GAPIService {
           // Store and return the trigger ID if creation was successful
           const triggerId = response?.triggerId;
           return triggerId;
-      } catch (error) {
+      } catch (error:any) {
           console.error('Error creating trigger:', error);
-          throw new Error("Trigger couldn't be created.");
+          if(error.error.error.message=="Found entity with duplicate name."){
+            throw new Error("Trigger already exists, aborting creation.")
+          } else {
+            throw new Error("Trigger couldn't be created.");
+          }
       }
     }
   
@@ -121,23 +129,30 @@ export class GAPIService {
         type: tagTemplateId,
         parameter: parameters.map(param => ({
           key: param.key,
-          type: 'template',
+          type: param.type,
           value: param.value
         })),
         firingTriggerId: [triggerId],
         tagFiringOption: 'oncePerEvent',
         parentFolderId: folderId,
+        monitoringMetadata: {
+            "type": "map"
+        },
         consentSettings: {
           consentStatus: 'notSet'
         }
       };
-  
+
       try {
           const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
           console.log(`${tagName} tag created successfully:`, response);
-      } catch (error) {
+      } catch (error:any) {
           console.error(`Error creating ${tagName} tag:`, error);
-          throw new Error("Tags couldn't be imported.");
+          if(error.error.error.message=="Found entity with duplicate name."){
+            throw new Error("Tag already exists, aborting creation.")
+          } else {
+            throw new Error("Tags couldn't be imported.");
+          }
       }
     }
     
@@ -163,9 +178,13 @@ export class GAPIService {
         const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
         console.log(`${templateName} template created successfully:`, response);
         return response.templateId;
-      } catch (error) {
-        console.error(`Error creating ${templateName} template:`, error);
-        throw new Error("Template couldn't be imported.");
+      } catch (error:any) {
+        console.error(`Error creating ${templateName} template:`, error); 
+        if(error.error.error.message=="Found entity with duplicate name."){
+          throw new Error("Template already exists, aborting creation.")
+        } else {
+          throw new Error("Template couldn't be imported.");
+        }
       }
     }
     

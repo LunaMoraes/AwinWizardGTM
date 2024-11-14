@@ -41,6 +41,13 @@ export const parameterData = {
     { key: 'voucher', type: 'template', value: '{{Awin - Voucher}}' },
     { key: 'channel', type: 'template', value: '{{AwinChannelCookie}}' },
     { key: 'plt', type: 'template', value: '{{Awin - PLT}}' },
-    { key: 'currency', type: 'template', value: '{{Awin - Currency}}' }
+    { key: 'currency', type: 'template', value: '{{Awin - Currency}}' },
+    {type: 'template', key: 'productId', value: ''},
+    {type: 'template', key: 'productName', value: ''},
+    {type: 'template', key: 'productCategory', value: ''},
+    {type: 'template', key: 'productQuantity', value: ''},
+    {type: 'template', key: 'productSku', value: ''},
+    {type: 'template', key: 'productCg', value: 'DEFAULT'},
+    {type: 'template', key: 'productPrice', value: ''},
   ]
 } as const;

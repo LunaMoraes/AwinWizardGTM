@@ -62,20 +62,26 @@ export class HomeComponent {
     
     // Convert to a number and check if it is even
     const idNumber = parseInt(id, 10);
-    return idNumber % 2 === 0;
+    return idNumber % 2 === 1;
   }
   validateInputs(): boolean {
     if (!this.isValidGTMContainer(this.gtmContainer)) {
-      this.warnMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
-      this.warn = true;
+      setTimeout(() => {
+        this.warnMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
+        this.warn = true;
+      });
       return false;
     } else if (!this.isValidAdvertiserID(this.advertiserID)) {
-      this.warnMessage = 'Invalid Advertiser ID. It should be a 5-digit number.';
-      this.warn = true;
+      setTimeout(() => {
+        this.warnMessage = 'Invalid Advertiser ID. It should be at least a 3-digit number.';
+        this.warn = true;
+      });
       return false;
     }
-    this.warnMessage = ''; // Clear error message if all validations pass
-    this.warn = false;
+    setTimeout(() => {
+      this.warnMessage = ''; // Clear error message if all validations pass
+      this.warn = false;
+    });
     return true;
   }
 
