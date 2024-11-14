@@ -8,15 +8,17 @@ import { ExampleComponent } from './example/example.component';
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'AwinWizardGTM';
   @ViewChild('backgroundVideo') backgroundVideo!: ElementRef<HTMLVideoElement>;
   
   ngAfterViewInit() {
-    this.backgroundVideo.nativeElement.play().catch(error => {
-      console.log('Autoplay was prevented:', error);
-    });
+    const videoElement = this.backgroundVideo.nativeElement;
+    videoElement.muted = true;
+    videoElement.play().catch(error => {
+    console.log('Autoplay was prevented:', error);
+  });
   }
 }
