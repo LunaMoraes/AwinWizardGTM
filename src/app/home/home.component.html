@@ -27,7 +27,7 @@
         placeholder="GTM-XXXXXXX"
       />
       <div class="form-check">
-        <input [(ngModel)]="provideAccountID" class="form-check-input" type="checkbox" value="" id="provideAccountIDCheck" checked>
+        <input (ngModelChange)="testValidation()" [(ngModel)]="provideAccountID" class="form-check-input" type="checkbox" value="" id="provideAccountIDCheck" checked>
         <label class="description-text" for="flexCheckChecked">
           Provide Account ID
         </label>

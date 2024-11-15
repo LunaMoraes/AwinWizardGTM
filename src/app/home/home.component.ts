@@ -51,8 +51,7 @@ export class HomeComponent {
   // Validators
   isValidGTMContainer(gtmContainer: any): boolean {
     const gtmPattern = /^GTM-[A-Z0-9]{6,}$/i;
-    //return gtmPattern.test(gtmContainer);
-    return true
+    return gtmPattern.test(gtmContainer);
   }
   isValidAdvertiserID(id: any): boolean {
     const advertiserIdPattern = /^\d{3,}$/;
@@ -64,6 +63,13 @@ export class HomeComponent {
     const idNumber = parseInt(id, 10);
     return idNumber % 2 === 1;
   }
+  isValidAccountID(AccountID: any): boolean {
+    if (this.provideAccountID == false) {return true;}
+    
+    const accountPattern = /^\d{6,}$/;
+    return accountPattern.test(AccountID);
+  }
+
   validateInputs(): boolean {
     if (!this.isValidGTMContainer(this.gtmContainer)) {
       setTimeout(() => {
@@ -73,11 +79,17 @@ export class HomeComponent {
       return false;
     } else if (!this.isValidAdvertiserID(this.advertiserID)) {
       setTimeout(() => {
-        this.warnMessage = 'Invalid Advertiser ID. It should be at least a 3-digit number.';
+        this.warnMessage = 'Invalid Advertiser ID. It should be at least a 3-digit odd number.';
         this.warn = true;
       });
       return false;
-    }
+    } else if (!this.isValidAccountID(this.accountIDValue)) {
+      setTimeout(() => {
+        this.warnMessage = 'Invalid Account ID. It should be at least a 6-digit number.';
+        this.warn = true;
+      });
+      return false;
+    } 
     setTimeout(() => {
       this.warnMessage = ''; // Clear error message if all validations pass
       this.warn = false;
@@ -89,6 +101,8 @@ export class HomeComponent {
 
   // Handle form submission and setup start
   onSubmit(): void {
+    if(this.provideAccountID==false){this.accountIDValue = 0}
+
     this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID, this.accountIDValue);
   }
 

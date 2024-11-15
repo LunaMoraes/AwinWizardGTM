@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthenticationService } from './authentication.service';
 import { IContainer } from '../models/wizard-interfaces';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +13,11 @@ export class GAPIService {
   constructor(private http: HttpClient, private authService: AuthenticationService) { }
 
     // Folder creation
-    async createFolder(fullURL: any): Promise<void> {
+    async createFolder(fullURL: any): Promise<string> {
       const url = `${this.apiUrl}/${fullURL}/folders`;
       const body = { name: 'Awin' };
       try {
-          const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
+          const response = await firstValueFrom(this.http.post<any>(url, body, { headers: this.authService.headers }));
           console.log('Folder created:', response);
           return response.folderId;
       } catch (error:any) {
@@ -31,16 +32,15 @@ export class GAPIService {
   
     // Get ID
     async fetchAccountId(container: IContainer[]): Promise<string | null> {
-      return await this.authService.fetchAccountIdByContainerPublicId(container)
-      .then(accountId => {
+      try {
+        const accountId = await this.authService.fetchAccountIdByContainerPublicId(container);
         return accountId;
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Error fetching account ID:", error);
         return null;
-      });
+      }
     }
-    
+
     // Variable creation
     async createVariables(
         fullURL: any, 
@@ -58,7 +58,7 @@ export class GAPIService {
           };
   
           try {
-              const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
+              const response = await firstValueFrom(this.http.post<any>(url, body, { headers: this.authService.headers }));
               console.log(`Variable "${variable.name}" created:`, response);
           } catch (error) {
               console.error(`Error creating variable "${variable.name}":`, error);
@@ -97,7 +97,7 @@ export class GAPIService {
         };
   
       try {
-          const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
+          const response = await firstValueFrom(this.http.post<any>(url, body, { headers: this.authService.headers }));
           console.log('Trigger created:', response);
           
           // Store and return the trigger ID if creation was successful
@@ -144,7 +144,7 @@ export class GAPIService {
       };
 
       try {
-          const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
+          const response = await firstValueFrom(this.http.post<any>(url, body, { headers: this.authService.headers }));
           console.log(`${tagName} tag created successfully:`, response);
       } catch (error:any) {
           console.error(`Error creating ${tagName} tag:`, error);
@@ -175,7 +175,7 @@ export class GAPIService {
       };
   
       try {
-        const response = await this.http.post<any>(url, body, { headers: this.authService.headers }).toPromise();
+        const response = await firstValueFrom(this.http.post<any>(url, body, { headers: this.authService.headers }));
         console.log(`${templateName} template created successfully:`, response);
         return response.templateId;
       } catch (error:any) {
