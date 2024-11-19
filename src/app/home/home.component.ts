@@ -18,8 +18,10 @@ import { environment } from '../../environments/environment';
 
 export class HomeComponent {
   gtmContainer: IContainer[] = [];
+  gtmContainerS2S: IContainer[] = [];
   selectedOption!: number;
   advertiserID!: number;
+  advertiserIDS2S!: number;
   containers: any[] = [];
   requestStatus: string = 'stopped';
   errorMessage: any;
@@ -29,6 +31,7 @@ export class HomeComponent {
   authed: boolean = false;
   provideAccountID: boolean = true;
   accountIDValue: number = 0;
+  accountIDValueS2S!: number;
     // Define the available installation options
     installationOptions = [
       { id: 1, label: 'Option 1: Ecommerce' },
@@ -141,6 +144,9 @@ export class HomeComponent {
   }
   testValidation(){
     this.validateInputs();
+  }
+  testValidationS2S(){
+    return true
   }
   logErrors(){
     console.log(this.warnMessage)
