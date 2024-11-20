@@ -98,20 +98,30 @@
 </div>
 <!-- Modal -->
 <div class="modal fade" data-bs-theme="dark" id="serverModal" tabindex="-1" aria-labelledby="serverModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
+  <div class="modal-dialog modal-lg custom-modal-dialog">
+    <div class="modal-content custom-modal-content">
       <div class="modal-header centered">
-        <h1 class="modal-title" id="serverModalLabel">Serverside Integration</h1>
+        <h2 class="title-white" id="serverModalLabel">Serverside Integration</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body text-center">
+      <div class="modal-body text-center custom-modal-body">
         <div class="mb-3">
           <label class="description-text" for="gtm-container-s2s">Enter Serverside GTM Container ID:</label>
           <input class="input-field gtmField mx-auto d-block"
             type="text"
             id="gtm-container-s2s"
             [(ngModel)]="gtmContainerS2S"
-            (blur)="testValidationS2S()"
+            (blur)="validateInputsS2S()"
+            placeholder="GTM-XXXXXXX"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="description-text" for="gtm-container-s2s-client">Enter Clientside GTM Container ID:</label>
+          <input class="input-field gtmField mx-auto d-block"
+            type="text"
+            id="gtm-container-s2s-client"
+            [(ngModel)]="gtmContainerS2SClient"
+            (blur)="validateInputsS2S()"
             placeholder="GTM-XXXXXXX"
           />
         </div>
@@ -121,7 +131,7 @@
             type="text"
             id="accountIDS2S"
             [(ngModel)]="accountIDValueS2S"
-            (blur)="testValidationS2S()"
+            (blur)="validateInputsS2S()"
             placeholder="XXXXXXX"
           />
         </div>
@@ -131,14 +141,17 @@
             type="text"
             id="advertiserIDS2S"
             [(ngModel)]="advertiserIDS2S"
-            (blur)="testValidationS2S()"
+            (blur)="validateInputsS2S()"
             placeholder="XXXXXXX"
           />
         </div>
       </div>
       <div class="modal-footer">
+        <div *ngIf="warnS2S === true" class="alert alert-warning" role="alert">
+          {{ warnMessageS2S }}
+        </div>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="big-button">Submit</button>
+        <button *ngIf="requestStatus != 'in-progress'" class="big-button" (click)="onSubmitS2S()" [disabled]="authed==false || !validateInputsS2S() || requestStatus == 'in-progress'">Submit</button>
       </div>
     </div>
   </div>

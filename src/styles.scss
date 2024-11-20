@@ -6,6 +6,10 @@ html, body, .container * {
   font-family: "Roboto" !important;
 }
 
+.title-white{
+  color: white;
+  
+}
 
 /* Description Text */
 .description-text {
@@ -64,4 +68,19 @@ html, body, .container * {
     object-fit: cover;
     z-index: -1000;
   }
+}
+.custom-modal-dialog {
+  max-height: 100vh; 
+  margin: 0 auto; 
+}
+
+.custom-modal-content {
+  height: 100%; 
+  display: flex;
+  flex-direction: column; 
+}
+
+.custom-modal-body {
+  flex: 1 1 auto; 
+  overflow-y: auto; 
 }

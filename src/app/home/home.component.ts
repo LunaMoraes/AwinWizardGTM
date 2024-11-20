@@ -19,6 +19,7 @@ import { environment } from '../../environments/environment';
 export class HomeComponent {
   gtmContainer: IContainer[] = [];
   gtmContainerS2S: IContainer[] = [];
+  gtmContainerS2SClient: IContainer[] = [];
   selectedOption!: number;
   advertiserID!: number;
   advertiserIDS2S!: number;
@@ -26,18 +27,22 @@ export class HomeComponent {
   requestStatus: string = 'stopped';
   errorMessage: any;
   warnMessage: any;
+  warnMessageS2S: any;
   devToolsActive: boolean = false;
   warn: boolean = false;
+  warnS2S: boolean = false;
   authed: boolean = false;
   provideAccountID: boolean = true;
   accountIDValue: number = 0;
   accountIDValueS2S!: number;
-    // Define the available installation options
-    installationOptions = [
-      { id: 1, label: 'Option 1: Ecommerce' },
-      { id: 2, label: 'Option 2: ActionField' },
-      { id: 3, label: 'Option 3: Custom' }
-    ];
+  touchedFields: { [key: string]: boolean } = {};
+
+  // Define the available installation options
+  installationOptions = [
+    { id: 1, label: 'Option 1: Ecommerce' },
+    { id: 2, label: 'Option 2: ActionField' },
+    { id: 3, label: 'Option 3: Custom' }
+  ];
   
   constructor(public devService: DevService, private WizardService: WizardService, private authService: AuthenticationService) {}
   
@@ -99,7 +104,39 @@ export class HomeComponent {
     });
     return true;
   }
-
+  validateInputsS2S(){
+    
+    if (!this.isValidGTMContainer(this.gtmContainerS2S)) {
+      setTimeout(() => {
+        this.warnMessageS2S = 'Invalid Server GTM Container ID. Format should be GTM-XXXXXXX.';
+        this.warnS2S = true;
+      });
+      return false;
+    } else if (!this.isValidAdvertiserID(this.gtmContainerS2SClient)) {
+      setTimeout(() => {
+        this.warnMessageS2S = 'Invalid Client GTM Container ID. Format should be GTM-XXXXXXX.';
+        this.warnS2S = true;
+      });
+      return false;
+    } else if (!this.isValidAdvertiserID(this.advertiserIDS2S)) {
+      setTimeout(() => {
+        this.warnMessageS2S = 'Invalid Advertiser ID. It should be at least a 3-digit odd number.';
+        this.warnS2S = true;
+      });
+      return false;
+    } else if (!this.isValidAccountID(this.accountIDValueS2S)) {
+      setTimeout(() => {
+        this.warnMessageS2S = 'Invalid Account ID. It should be at least a 6-digit number.';
+        this.warnS2S = true;
+      });
+      return false;
+    } 
+    setTimeout(() => {
+      this.warnMessage = ''; // Clear error message if all validations pass
+      this.warn = false;
+    });
+    return true;
+  }
 
 
   // Handle form submission and setup start
@@ -107,6 +144,8 @@ export class HomeComponent {
     if(this.provideAccountID==false){this.accountIDValue = 0}
 
     this.installGTM(this.gtmContainer, this.selectedOption, this.advertiserID, this.accountIDValue);
+  }
+  onSubmitS2S(): void {
   }
 
   private async installGTM(ContainerID: IContainer[], SelectedOption: number, advertiserID:number, accountIDValue: number): Promise<void> {
@@ -144,9 +183,6 @@ export class HomeComponent {
   }
   testValidation(){
     this.validateInputs();
-  }
-  testValidationS2S(){
-    return true
   }
   logErrors(){
     console.log(this.warnMessage)
