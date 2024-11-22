@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, AfterViewInit, AfterViewChecked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { IContainer } from '../models/wizard-interfaces';
@@ -7,6 +7,7 @@ import { DevService } from '../Services/dev.service';
 import { AuthenticationService } from '../Services/authentication.service';
 import { environment } from '../../environments/environment';
 
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-home',
@@ -16,10 +17,14 @@ import { environment } from '../../environments/environment';
   imports: [FormsModule, CommonModule]
 })
 
-export class HomeComponent {
+export class HomeComponent implements AfterViewInit, AfterViewChecked {
+  private tooltips: any[] = [];
+  private tooltipsInitialized = false;
+
   gtmContainer: IContainer[] = [];
   gtmContainerS2S: IContainer[] = [];
   gtmContainerS2SClient: IContainer[] = [];
+  validatedClientside: boolean = false;
   selectedOption!: number;
   advertiserID!: number;
   advertiserIDS2S!: number;
@@ -47,6 +52,35 @@ export class HomeComponent {
   constructor(public devService: DevService, private WizardService: WizardService, private authService: AuthenticationService) {}
   
   // Basic Functions
+  ngAfterViewInit() {
+    this.initializeTooltips();
+  }
+
+  ngAfterViewChecked() {
+    if (!this.tooltipsInitialized) {
+      this.initializeTooltips();
+    }
+  }
+
+  private initializeTooltips() {
+    // Dispose existing tooltips
+    this.tooltips.forEach(tooltip => tooltip.dispose());
+    this.tooltips = [];
+
+    // Initialize new tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    this.tooltips = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    this.tooltipsInitialized = this.tooltips.length > 0;
+  }
+
+  // When content changes that affects tooltips visibility
+  private resetTooltips() {
+    this.tooltipsInitialized = false;
+  }
+
   startLogin(): void {
     this.authService.signIn();
     this.authed = true;
@@ -79,28 +113,33 @@ export class HomeComponent {
   }
 
   validateInputs(): boolean {
+    this.resetTooltips();
     if (!this.isValidGTMContainer(this.gtmContainer)) {
       setTimeout(() => {
         this.warnMessage = 'Invalid GTM Container ID. Format should be GTM-XXXXXXX.';
         this.warn = true;
+        this.validatedClientside = false;
       });
       return false;
     } else if (!this.isValidAdvertiserID(this.advertiserID)) {
       setTimeout(() => {
         this.warnMessage = 'Invalid Advertiser ID. It should be at least a 3-digit odd number.';
         this.warn = true;
+        this.validatedClientside = false;
       });
       return false;
     } else if (!this.isValidAccountID(this.accountIDValue)) {
       setTimeout(() => {
         this.warnMessage = 'Invalid Account ID. It should be at least a 6-digit number.';
         this.warn = true;
+        this.validatedClientside = false;
       });
       return false;
     } 
     setTimeout(() => {
       this.warnMessage = ''; // Clear error message if all validations pass
       this.warn = false;
+      this.validatedClientside = true;
     });
     return true;
   }
@@ -159,8 +198,6 @@ export class HomeComponent {
       this.errorMessage = setup.message;
     }
   }
-
-
 
 
   //Dev Tools Buttons

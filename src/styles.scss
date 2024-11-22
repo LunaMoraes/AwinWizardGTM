@@ -42,6 +42,22 @@ html, body, .container * {
 }
 
 
+// Custom Tooltip Styles
+.custom-tooltip {
+  --bs-tooltip-bg: #4e2408 !important;
+}
+.tooltip.custom-tooltip .tooltip-inner {
+  --bs-tooltip-bg: #4e2408 !important;
+}
+
+.tooltip.custom-tooltip .tooltip-arrow::before {
+  --bs-tooltip-bg: #4e2408 !important;
+}
+[data-bs-toggle="tooltip"] {
+  position: relative;
+  display: inline-block;
+}
+
 .container {
   padding-top: 0%;
   padding-left: 1%; 

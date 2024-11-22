@@ -1,8 +1,10 @@
 <div class="container flex-line">
   <div class="leftpanel">
-    <button type="button" [disabled]="authed==false" class="small-button" data-bs-toggle="modal" data-bs-target="#serverModal">
-      Serverside integration
-    </button>
+    <div tabindex="1" data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-title="This feature is currently disabled">
+      <button type="button" [disabled]="true" class="small-button" data-bs-toggle="modal" data-bs-target="#serverModal">
+        Serverside integration
+      </button>
+    </div>
     <button class="small-button" (click)="toggleDevTools()">Toggle Dev Tools</button>
       <div *ngIf="devToolsActive === true" class="dev-tools">
         <button class="small-button"  (click)="fetchContainers()">Fetch Containers</button>
@@ -30,9 +32,9 @@
         placeholder="GTM-XXXXXXX"
       />
       <div class="form-check">
-        <input (ngModelChange)="testValidation()" [(ngModel)]="provideAccountID" class="form-check-input" type="checkbox" value="" id="provideAccountIDCheck" checked>
+        <input (change)="testValidation()" [(ngModel)]="provideAccountID" class="form-check-input" type="checkbox" value="" id="provideAccountIDCheck" checked>
         <label class="description-text" for="flexCheckChecked">
-          Provide Account ID
+          Provide Account ID <i data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-title="Utilizing an account ID will make the code faster and less likely to break" class="bi bi-question-circle"></i>
         </label>
       </div>
       <input *ngIf="provideAccountID == true" class="input-field  gtmField"
@@ -80,9 +82,18 @@
       <div *ngIf="requestStatus === 'in-progress'" class="margin-bot spinner-border text-warning" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <button *ngIf="requestStatus != 'in-progress'" class="big-button" (click)="onSubmit()" [disabled]="authed==false || !validateInputs() || requestStatus == 'in-progress'">
-        Submit
-      </button>
+      <div *ngIf="requestStatus != 'in-progress'">
+        <div *ngIf="authed==false || this.validatedClientside==false" tabindex="1" >
+          <div data-bs-toggle="tooltip" data-bs-custom-class="custom-tooltip" data-bs-title="Please complete all required fields and ensure you are logged in">
+          <button class="big-button" [disabled]="true">
+            Submit
+          </button>
+        </div>
+        </div>
+        <button *ngIf="authed==true && this.validatedClientside==true" class="big-button" (click)="onSubmit()">
+          Submit
+        </button>
+      </div>
       <br>
       <div *ngIf="warn === true" class="alert alert-warning" role="alert">
         {{ warnMessage }}
